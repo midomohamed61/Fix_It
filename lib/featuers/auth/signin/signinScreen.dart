@@ -1,288 +1,140 @@
-import 'package:fix_it/core/routing/routes.dart';
+import 'package:fix_it/core/helpers/app_regex.dart';
+import 'package:fix_it/featuers/auth/signin/widget/auth_custom_app_bar.dart';
+import 'package:fix_it/featuers/auth/signin/widget/custom_password_field.dart' show CustomPasswordField;
+import 'package:fix_it/featuers/auth/signin/widget/custom_text_field.dart';
+import 'package:fix_it/featuers/auth/signin/widget/social_button.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:google_fonts/google_fonts.dart';
 
-class SigninScreen extends StatefulWidget {
-  const SigninScreen({super.key});
+class SignInScreen extends StatefulWidget {
+  const SignInScreen({super.key});
 
   @override
-  State<SigninScreen> createState() => _SigninScreenState();
+  State<SignInScreen> createState() => _SignInScreenState();
 }
 
-class _SigninScreenState extends State<SigninScreen> {
-  final _formKey = GlobalKey<FormState>(); // Form key for validation
-  bool _isPasswordVisible = false;
-  bool _isChecked = false;
-
-  final TextEditingController _fullNameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+class _SignInScreenState extends State<SignInScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AuthCustomAppBar(
+        onBack: () => Navigator.pop(context), // action عند الضغط على زر الرجوع
+      ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
-        child: Center(
+        child: Form(
+          key: _formKey,
           child: SingleChildScrollView(
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Image(
-                    image: AssetImage("assets/images/Frame.png"),
-                    height: 50.h,
-                    width: 48.75.w,
-                  ),
-                  const SizedBox(height: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 20),
+                const Text(
+                  "Enter your email and password to login",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(height: 20),
 
-                  Text(
-                    "Enter your email and password to login",
-                    style: GoogleFonts.poppins(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
+                // Email Field
+                CustomTextField(
+                  hintText: "Enter your email",
+                  icon: Icons.email_outlined,
+                  controller: _emailController,
+                  validator: (value) => AppRegex.isEmailValid(value!) ? null : "Invalid email",
+                ),
+                const SizedBox(height: 16),
 
-                  // Full Name Field
-                  TextFormField(
-                    controller: _fullNameController,
-                    decoration: InputDecoration(
-                      prefixIcon: Icon(Icons.person_outline),
-                      hintText: "Full name",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
+                // Password Field
+                CustomPasswordField(
+                  controller: _passwordController,
+                  validator: (value) => value!.isEmpty ? "Password required" : null,
+                ),
+                const SizedBox(height: 8),
+
+                // Forgot Password
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () {}, // Forgot password
+                    child: const Text("Forgot Password?"),
+                  ),
+                ),
+
+                // Sign In Button
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Full name is required";
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        // Login process
                       }
-                      return null;
                     },
+                    child: const Text("Sign In"),
                   ),
-                  const SizedBox(height: 15),
+                ),
+                const SizedBox(height: 20),
 
-                  // Email Field
-                  TextFormField(
-                    controller: _emailController,
-                    decoration: InputDecoration(
-                      prefixIcon: Icon(Icons.email_outlined),
-                      hintText: "Enter your email",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
+                // Sign Up Now
+                Center(
+  child: Text.rich(
+    TextSpan(
+      text: "New to fixIt? ",
+      style: const TextStyle(fontSize: 14, color: Colors.black),
+      children: [
+        TextSpan(
+          text: "Sign up now",
+          style: const TextStyle(
+            color: Colors.blue,
+            fontWeight: FontWeight.bold,
+          ),
+          recognizer: TapGestureRecognizer()
+            ..onTap = () {
+              Navigator.pushNamed(context, '/SignupScreen'); // ✅ هنا بينتقل لصفحة التسجيل
+            },
+        ),
+      ],
+    ),
+  ),
+),
+
+                const SizedBox(height: 20),
+
+                Row(
+                  children: [
+                    Expanded(child: Divider(thickness: 1)),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: const Text("Or"),
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Email is required";
-                      } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                        return "Enter a valid email";
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 15),
+                    Expanded(child: Divider(thickness: 1)),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                Center(child: const Text("Log in with")),
+                const SizedBox(height: 16),
 
-                  // Password Field with Visibility Toggle
-                  TextFormField(
-                    controller: _passwordController,
-                    obscureText: !_isPasswordVisible,
-                    decoration: InputDecoration(
-                      prefixIcon: Icon(Icons.lock_outline),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _isPasswordVisible = !_isPasswordVisible;
-                          });
-                        },
-                      ),
-                      hintText: "Enter your password",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Password is required";
-                      } else if (value.length < 6) {
-                        return "Password must be at least 6 characters";
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 10),
-
-                  // Terms & Conditions Checkbox
-                  Row(
-                    children: [
-                      Checkbox(
-                        value: _isChecked,
-                        onChanged: (bool? value) {
-                          setState(() {
-                            _isChecked = value!;
-                          });
-                        },
-                      ),
-                      Expanded(
-                        child: Text.rich(
-                          TextSpan(
-                            text: "I Agree With FixIt’s ",
-                            style: GoogleFonts.poppins(fontSize: 14),
-                            children: [
-                              TextSpan(
-                                text: "Term & Conditions",
-                                style: GoogleFonts.poppins(
-                                  fontSize: 14,
-                                  color: Colors.blue,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-
-                  // Forgot Password
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () {},
-                      child: Text(
-                        "Forgot Password?",
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          color: Colors.blue,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-
-                  // Sign In Button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      onPressed: () {
-                        if (_formKey.currentState!.validate() && _isChecked) {
-                          // Form is valid, proceed with sign-in
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text("Sign-in Successful")),
-                          );
-                        }
-                      },
-                      child: Text(
-                        "Sign In",
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Sign Up Prompt
-                  Center(
-                    child: Text.rich(
-                      TextSpan(
-                        text: "New to fixIt? ",
-                        style: GoogleFonts.poppins(fontSize: 14),
-                        children: [
-                          TextSpan(
-                            text: "Sign up now",
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () {
-                                Navigator.of(context)
-                                    .pushNamed(Routes.SignupScreen);
-                              },
-                            style: GoogleFonts.poppins(
-                              fontSize: 14,
-                              color: Colors.blue,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Divider
-                  Row(
-                    children: [
-                      Expanded(child: Divider(thickness: 1)),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Text("Or", style: GoogleFonts.poppins()),
-                      ),
-                      Expanded(child: Divider(thickness: 1)),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Social Login Buttons
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _socialButton(
-                        icon: FontAwesomeIcons.google,
-                        text: "Google",
-                        color: Colors.white,
-                        textColor: Colors.black,
-                      ),
-                      _socialButton(
-                        icon: FontAwesomeIcons.facebook,
-                        text: "Facebook",
-                        color: Colors.white,
-                        textColor: Colors.black,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                Row(
+                  children: [
+                    SocialButton(icon: FontAwesomeIcons.google, text: 'Google', onPressed: () {}),
+                    const SizedBox(width: 10),
+                    SocialButton(icon: FontAwesomeIcons.facebook, text: 'Facebook', onPressed: () {}),
+                  ],
+                ),
+                const SizedBox(height: 30),
+              ],
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _socialButton(
-      {required IconData icon,
-      required String text,
-      required Color color,
-      required Color textColor}) {
-    return ElevatedButton.icon(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        elevation: 2,
-      ),
-      onPressed: () {},
-      icon: Icon(icon, color: textColor),
-      label: Text(
-        text,
-        style: GoogleFonts.poppins(fontSize: 14, color: textColor),
       ),
     );
   }
