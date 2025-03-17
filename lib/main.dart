@@ -4,17 +4,17 @@ import 'package:fix_it/core/routing/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await setupGetIt(); // خليه هنا بس
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    setupGetIt();
     return ScreenUtilInit(
       designSize: const Size(375, 812),
       minTextAdapt: true,

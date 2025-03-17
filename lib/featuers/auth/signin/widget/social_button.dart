@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class SocialButton extends StatelessWidget {
   final IconData icon;
@@ -14,17 +15,20 @@ class SocialButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
+    return SizedBox(
+      width: double.infinity, // بدل Expanded جوه
+      height: 50, // حجم موحد
       child: ElevatedButton.icon(
-        icon: Icon(icon, color: Colors.black),
-        label: Text(text, style: const TextStyle(color: Colors.black)),
-        onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.white,
-          elevation: 1,
-          side: BorderSide(color: Colors.grey.shade300),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          backgroundColor: Colors.grey[200],
+          foregroundColor: Colors.black,
         ),
+        onPressed: onPressed,
+        icon: Icon(icon, size: 20),
+        label: Text(text),
       ),
     );
   }

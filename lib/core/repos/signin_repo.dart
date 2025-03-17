@@ -1,7 +1,7 @@
 
 
-import 'package:fix_it/core/models/login_request_body.dart';
-import 'package:fix_it/core/models/login_response.dart';
+import 'package:fix_it/core/models/signin/login_request_body.dart';
+import 'package:fix_it/core/models/signin/login_response.dart';
 import 'package:fix_it/core/networking/api_error_handler.dart';
 import 'package:fix_it/core/networking/api_result.dart';
 import 'package:fix_it/core/networking/api_service.dart';

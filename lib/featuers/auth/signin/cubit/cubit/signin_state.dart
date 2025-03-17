@@ -6,7 +6,7 @@ part 'signin_state.freezed.dart';
 class SigninState<T> with _$SigninState<T> {
   const factory SigninState.initial() = _Initial;
   
-  const factory SigninState.loading() = Loading;
+  const factory SigninState.Loading() = Loading;
   const factory SigninState.success(T data) = Success<T>;
   const factory SigninState.error({required String error}) = Error;
 }

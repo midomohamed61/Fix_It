@@ -1,34 +1,39 @@
-import 'package:fix_it/core/helpers/app_regex.dart';
+import 'package:fix_it/featuers/auth/signin/cubit/cubit/signin_cubit.dart';
+import 'package:fix_it/featuers/auth/signin/cubit/cubit/signin_state.dart';
 import 'package:fix_it/featuers/auth/signin/widget/auth_custom_app_bar.dart';
-import 'package:fix_it/featuers/auth/signin/widget/custom_password_field.dart' show CustomPasswordField;
+import 'package:fix_it/featuers/auth/signin/widget/custom_password_field.dart';
 import 'package:fix_it/featuers/auth/signin/widget/custom_text_field.dart';
 import 'package:fix_it/featuers/auth/signin/widget/social_button.dart';
+import 'package:fix_it/core/helpers/app_regex.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-class SignInScreen extends StatefulWidget {
+class SignInScreen extends StatelessWidget {
   const SignInScreen({super.key});
 
   @override
-  State<SignInScreen> createState() => _SignInScreenState();
+  Widget build(BuildContext context) {
+    return const SignInScreenBody();
+  }
 }
 
-class _SignInScreenState extends State<SignInScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
+class SignInScreenBody extends StatelessWidget {
+  const SignInScreenBody({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final cubit = context.read<SigninCubit>();
+
     return Scaffold(
       appBar: AuthCustomAppBar(
-        onBack: () => Navigator.pop(context), // action عند الضغط على زر الرجوع
+        onBack: () => Navigator.pop(context),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
         child: Form(
-          key: _formKey,
+          key: cubit.formKey,
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -40,94 +45,142 @@ class _SignInScreenState extends State<SignInScreen> {
                 ),
                 const SizedBox(height: 20),
 
-                // Email Field
+                /// Email Field
                 CustomTextField(
                   hintText: "Enter your email",
                   icon: Icons.email_outlined,
-                  controller: _emailController,
-                  validator: (value) => AppRegex.isEmailValid(value!) ? null : "Invalid email",
+                  controller: cubit.emailController,
+                  validator: (value) => AppRegex.isEmailValid(value!)
+                      ? null
+                      : "Invalid email format",
                 ),
                 const SizedBox(height: 16),
 
-                // Password Field
+                /// Password Field
                 CustomPasswordField(
-                  controller: _passwordController,
-                  validator: (value) => value!.isEmpty ? "Password required" : null,
+                  controller: cubit.passwordController,
+                  validator: (value) =>
+                      value!.isEmpty ? "Password is required" : null,
                 ),
                 const SizedBox(height: 8),
 
-                // Forgot Password
+                /// Forgot Password Button
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
-                    onPressed: () {}, // Forgot password
+                    onPressed: () {}, // Forgot password logic
                     child: const Text("Forgot Password?"),
                   ),
                 ),
+                const SizedBox(height: 16),
 
-                // Sign In Button
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                /// Sign In Button with BlocConsumer
+                BlocConsumer<SigninCubit, SigninState>(
+                  listener: (context, state) {
+                    if (state is Success) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Login Successful!")),
+                      );
+                      Navigator.pushNamed(context, '/HomeScreen');
+                    } else if (state is Error) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(state.error)),
+                      );
+                    }
+                  },
+                  builder: (context, state) {
+                    final isLoading = state is Loading;
+                    return SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: isLoading
+                            ? null
+                            : () {
+                                if (cubit.formKey.currentState!.validate()) {
+                                  cubit.emitSigninStates();
+                                }
+                              },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: isLoading
+                            ? const CircularProgressIndicator(
+                                color: Colors.white,
+                              )
+                            : const Text(
+                                "Sign In",
+                                style: TextStyle(color: Colors.white),
+                              ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 20),
+
+                /// Sign Up Redirect
+                Center(
+                  child: Text.rich(
+                    TextSpan(
+                      text: "New to fixIt? ",
+                      style: const TextStyle(fontSize: 14, color: Colors.black),
+                      children: [
+                        TextSpan(
+                          text: "Sign up now",
+                          style: const TextStyle(
+                            color: Colors.blue,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () {
+                              Navigator.pushNamed(context, '/SignupScreen');
+                            },
+                        ),
+                      ],
                     ),
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        // Login process
-                      }
-                    },
-                    child: const Text("Sign In"),
                   ),
                 ),
                 const SizedBox(height: 20),
 
-                // Sign Up Now
-                Center(
-  child: Text.rich(
-    TextSpan(
-      text: "New to fixIt? ",
-      style: const TextStyle(fontSize: 14, color: Colors.black),
-      children: [
-        TextSpan(
-          text: "Sign up now",
-          style: const TextStyle(
-            color: Colors.blue,
-            fontWeight: FontWeight.bold,
-          ),
-          recognizer: TapGestureRecognizer()
-            ..onTap = () {
-              Navigator.pushNamed(context, '/SignupScreen'); // ✅ هنا بينتقل لصفحة التسجيل
-            },
-        ),
-      ],
-    ),
-  ),
-),
-
-                const SizedBox(height: 20),
-
+                /// Divider
                 Row(
-                  children: [
+                  children: const [
                     Expanded(child: Divider(thickness: 1)),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: const Text("Or"),
+                      padding: EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text("Or"),
                     ),
                     Expanded(child: Divider(thickness: 1)),
                   ],
                 ),
                 const SizedBox(height: 20),
-                Center(child: const Text("Log in with")),
-                const SizedBox(height: 16),
 
+                /// Social Login
+                const Center(child: Text("Log in with")),
+                const SizedBox(height: 16),
                 Row(
                   children: [
-                    SocialButton(icon: FontAwesomeIcons.google, text: 'Google', onPressed: () {}),
+                    /// Google Button
+                    Flexible(
+                      child: SocialButton(
+                        icon: FontAwesomeIcons.google,
+                        text: 'Google',
+                        onPressed: () {}, // Google login
+                      ),
+                    ),
                     const SizedBox(width: 10),
-                    SocialButton(icon: FontAwesomeIcons.facebook, text: 'Facebook', onPressed: () {}),
+
+                    /// Facebook Button
+                    Flexible(
+                      child: SocialButton(
+                        icon: FontAwesomeIcons.facebook,
+                        text: 'Facebook',
+                        onPressed: () {}, // Facebook login
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 30),
