@@ -1,3 +1,4 @@
+import 'package:fix_it/core/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class CustomCheckboxRow extends StatelessWidget {
@@ -21,7 +22,7 @@ class CustomCheckboxRow extends StatelessWidget {
             children: [
               TextSpan(
                 text: "Term & Conditions",
-                style: TextStyle(color: Colors.blue),
+                style: TextStyle(color: AppColors.primaryColor),
               ),
             ],
           ),

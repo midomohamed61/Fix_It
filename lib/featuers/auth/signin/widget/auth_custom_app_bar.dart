@@ -1,12 +1,11 @@
+import 'package:fix_it/core/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class AuthCustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final VoidCallback onBack;
   final String logoPath;
 
   const AuthCustomAppBar({
     super.key,
-    required this.onBack,
     this.logoPath = 'assets/images/Frame.png', // المسار الافتراضي للوجو
   });
 
@@ -16,13 +15,6 @@ class AuthCustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.black),
-        onPressed: onBack,
-      ),
-      centerTitle: true,
       title: Image.asset(
         logoPath,
         height: 30, // حجم اللوجو

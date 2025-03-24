@@ -1,3 +1,4 @@
+import 'package:fix_it/core/themes/app_colors.dart' show AppColors;
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -23,8 +24,8 @@ class SocialButton extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
-          backgroundColor: Colors.grey[200],
-          foregroundColor: Colors.black,
+          backgroundColor: AppColors.greyTextColor,
+          foregroundColor: AppColors.textColor,
         ),
         onPressed: onPressed,
         icon: Icon(icon, size: 20),

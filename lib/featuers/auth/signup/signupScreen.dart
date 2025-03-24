@@ -1,3 +1,4 @@
+import 'package:fix_it/core/themes/app_colors.dart';
 import 'package:fix_it/featuers/auth/signup/cubit/cubit/signup_cubit.dart';
 import 'package:fix_it/featuers/auth/signup/cubit/cubit/signup_state.dart';
 import 'package:fix_it/featuers/auth/signin/widget/auth_custom_app_bar.dart';
@@ -18,7 +19,7 @@ class SignUpScreen extends StatelessWidget {
     final cubit = context.read<SignupCubit>();
 
     return Scaffold(
-      appBar: AuthCustomAppBar(onBack: () => Navigator.pop(context)),
+      appBar: AuthCustomAppBar(),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
         child: Form(
@@ -82,7 +83,7 @@ class SignUpScreen extends StatelessWidget {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Signup Successful!')),
                       );
-                      Navigator.pushNamed(context, '/HomeScreen');
+                      Navigator.pushNamed(context, '/RoleSelectionScreen');
                     } else if (state is SignupError) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text(state.error)),
@@ -99,17 +100,17 @@ class SignUpScreen extends StatelessWidget {
                             ? null
                             : () => cubit.emitSignupStates(),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
+                          backgroundColor: AppColors.primaryColor,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
                         child: isLoading
                             ? const CircularProgressIndicator(
-                                color: Colors.white,
+                                color: AppColors.backgroundColor,
                               )
                             : const Text("Sign Up",
-                                style: TextStyle(color: Colors.white)),
+                                style: TextStyle(color: AppColors.backgroundColor)),
                       ),
                     );
                   },
@@ -120,12 +121,12 @@ class SignUpScreen extends StatelessWidget {
                   child: Text.rich(
                     TextSpan(
                       text: "Already have an account? ",
-                      style: const TextStyle(fontSize: 14, color: Colors.black),
+                      style: const TextStyle(fontSize: 14, color: AppColors.textColor),
                       children: [
                         TextSpan(
                           text: "Sign in",
                           style: const TextStyle(
-                              color: Colors.blue, fontWeight: FontWeight.bold),
+                              color: AppColors.primaryColor, fontWeight: FontWeight.bold),
                           recognizer: TapGestureRecognizer()
                             ..onTap = () {
                               Navigator.pushNamed(context, '/SigninScreen');

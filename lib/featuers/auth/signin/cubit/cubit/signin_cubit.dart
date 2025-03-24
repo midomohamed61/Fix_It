@@ -1,4 +1,3 @@
-import 'package:fix_it/core/helpers/constants.dart';
 import 'package:fix_it/core/helpers/shared_pref_helper.dart';
 import 'package:fix_it/core/models/signin/login_request_body.dart';
 import 'package:fix_it/core/networking/dio_factory.dart';
@@ -12,22 +11,22 @@ class SigninCubit extends Cubit<SigninState> {
 
   SigninCubit(this._signinRepo) : super(const SigninState.initial());
 
-  /// Controllers
+  // Controllers
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  /// Form Key
+  // Form Key
   final formKey = GlobalKey<FormState>();
 
-  /// Login Method
+  // Login Method
   Future<void> emitSigninStates() async {
-    if (!formKey.currentState!.validate()) return; // Stop if form is not valid
+    if (!formKey.currentState!.validate()) return;
 
-    emit(const SigninState.Loading()); // Emit loading state
+    emit(const SigninState.Loading());
 
     final response = await _signinRepo.login(
       LoginRequestBody(
-        email: emailController.text.trim(), // Trim for safety
+        email: emailController.text.trim(),
         password: passwordController.text.trim(),
       ),
     );
@@ -36,29 +35,21 @@ class SigninCubit extends Cubit<SigninState> {
       success: (loginResponse) async {
         final token = loginResponse.userData?.token ?? '';
 
-        /// Save Token & Set Header
+        // Save Token & Set Header
         await _saveUserToken(token);
 
-        /// Emit success state with data
         emit(SigninState.success(loginResponse));
       },
       failure: (error) {
-        emit(SigninState.error(
-          error: error.apiErrorModel.message ?? 'حدث خطأ ما!',
-        ));
+        emit(SigninState.error(error: error.apiErrorModel.message ?? 'Error'));
       },
     );
   }
 
-  /// Save Token Locally and Add it to Dio Header
+  // Save Token Locally and Add it to Dio Header
   Future<void> _saveUserToken(String token) async {
-    await SharedPrefHelper.setSecuredString(SharedPrefKeys.userToken, token);
+    await SharedPrefHelper.setData('userToken', token); // Saving token
     DioFactory.setTokenIntoHeaderAfterLogin(token);
   }
-
-  /// Dispose Controllers when Needed (Optional for better management)
-  void disposeControllers() {
-    emailController.dispose();
-    passwordController.dispose();
-  }
 }
+

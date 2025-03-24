@@ -1,3 +1,4 @@
+import 'package:fix_it/core/themes/app_colors.dart';
 import 'package:fix_it/featuers/auth/signin/cubit/cubit/signin_cubit.dart';
 import 'package:fix_it/featuers/auth/signin/cubit/cubit/signin_state.dart';
 import 'package:fix_it/featuers/auth/signin/widget/auth_custom_app_bar.dart';
@@ -15,21 +16,10 @@ class SignInScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SignInScreenBody();
-  }
-}
-
-class SignInScreenBody extends StatelessWidget {
-  const SignInScreenBody({super.key});
-
-  @override
-  Widget build(BuildContext context) {
     final cubit = context.read<SigninCubit>();
 
     return Scaffold(
-      appBar: AuthCustomAppBar(
-        onBack: () => Navigator.pop(context),
-      ),
+      appBar: AuthCustomAppBar(),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
         child: Form(
@@ -39,15 +29,13 @@ class SignInScreenBody extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 20),
-                const Text(
-                  "Enter your email and password to login",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                ),
+                const Text("Sign in to your account",
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
                 const SizedBox(height: 20),
 
-                /// Email Field
                 CustomTextField(
-                  hintText: "Enter your email",
+                  hintText: "Email",
                   icon: Icons.email_outlined,
                   controller: cubit.emailController,
                   validator: (value) => AppRegex.isEmailValid(value!)
@@ -56,32 +44,20 @@ class SignInScreenBody extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
 
-                /// Password Field
                 CustomPasswordField(
                   controller: cubit.passwordController,
                   validator: (value) =>
                       value!.isEmpty ? "Password is required" : null,
                 ),
-                const SizedBox(height: 8),
-
-                /// Forgot Password Button
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () {}, // Forgot password logic
-                    child: const Text("Forgot Password?"),
-                  ),
-                ),
                 const SizedBox(height: 16),
 
-                /// Sign In Button with BlocConsumer
                 BlocConsumer<SigninCubit, SigninState>(
                   listener: (context, state) {
                     if (state is Success) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Login Successful!")),
+                        const SnackBar(content: Text('Login Successful!')),
                       );
-                      Navigator.pushNamed(context, '/HomeScreen');
+                      Navigator.pushNamed(context, '/RoleSelectionScreen');
                     } else if (state is Error) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text(state.error)),
@@ -96,44 +72,35 @@ class SignInScreenBody extends StatelessWidget {
                       child: ElevatedButton(
                         onPressed: isLoading
                             ? null
-                            : () {
-                                if (cubit.formKey.currentState!.validate()) {
-                                  cubit.emitSigninStates();
-                                }
-                              },
+                            : () => cubit.emitSigninStates(),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
+                          backgroundColor: AppColors.primaryColor,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
                         child: isLoading
                             ? const CircularProgressIndicator(
-                                color: Colors.white,
+                                color: AppColors.backgroundColor,
                               )
-                            : const Text(
-                                "Sign In",
-                                style: TextStyle(color: Colors.white),
-                              ),
+                            : const Text("Sign In",
+                                style: TextStyle(color: AppColors.backgroundColor)),
                       ),
                     );
                   },
                 ),
                 const SizedBox(height: 20),
 
-                /// Sign Up Redirect
                 Center(
                   child: Text.rich(
                     TextSpan(
-                      text: "New to fixIt? ",
+                      text: "Don't have an account? ",
                       style: const TextStyle(fontSize: 14, color: Colors.black),
                       children: [
                         TextSpan(
                           text: "Sign up now",
                           style: const TextStyle(
-                            color: Colors.blue,
-                            fontWeight: FontWeight.bold,
-                          ),
+                              color: AppColors.primaryColor, fontWeight: FontWeight.bold),
                           recognizer: TapGestureRecognizer()
                             ..onTap = () {
                               Navigator.pushNamed(context, '/SignupScreen');
@@ -145,7 +112,6 @@ class SignInScreenBody extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
 
-                /// Divider
                 Row(
                   children: const [
                     Expanded(child: Divider(thickness: 1)),
@@ -158,30 +124,19 @@ class SignInScreenBody extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
 
-                /// Social Login
-                const Center(child: Text("Log in with")),
+                const Center(child: Text("Sign in with")),
                 const SizedBox(height: 16),
-                Row(
-                  children: [
-                    /// Google Button
-                    Flexible(
-                      child: SocialButton(
-                        icon: FontAwesomeIcons.google,
-                        text: 'Google',
-                        onPressed: () {}, // Google login
-                      ),
-                    ),
-                    const SizedBox(width: 10),
 
-                    /// Facebook Button
-                    Flexible(
-                      child: SocialButton(
-                        icon: FontAwesomeIcons.facebook,
-                        text: 'Facebook',
-                        onPressed: () {}, // Facebook login
-                      ),
-                    ),
-                  ],
+                SocialButton(
+                  icon: FontAwesomeIcons.google,
+                  text: 'Google',
+                  onPressed: () {},
+                ),
+                const SizedBox(height: 10),
+                SocialButton(
+                  icon: FontAwesomeIcons.facebook,
+                  text: 'Facebook',
+                  onPressed: () {},
                 ),
                 const SizedBox(height: 30),
               ],
