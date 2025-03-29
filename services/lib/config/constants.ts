@@ -15,8 +15,8 @@ export enum Languages {
   }
   
   export enum Pages {
-    LOGIN = "signin",
-    Register = "signup",
+    LOGIN = "login",
+    Register = "register",
     FORGOT_PASSWORD = "forgot-password",
     CATEGORIES = "categories",
     MENU_ITEMS = "menu-items",

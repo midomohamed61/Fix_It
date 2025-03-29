@@ -1,7 +1,125 @@
+import WorkerProfileCard from "@/components/ui/Card/Card";
+import HomePage from "../Pages/HomePage/HomePage";
 
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+    <div className="flex flex-col min-h-screen bg-white">
+      <HomePage/>
+      <header className="bg-emerald-800 text-white py-4 text-center">
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Our Workers</h1>
+      </header>
+      <div className="flex-grow flex justify-center px-2 sm:px-4 md:px-6 py-8 bg-emerald-800">
+        <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-x-2 gap-y-4 sm:gap-x-3 sm:gap-y-5 md:gap-x-4 md:gap-y-6 w-full max-w-[1400px] bg-fuchsia-600 p-2 sm:p-4 md:p-6">
+          <WorkerProfileCard 
+            name="Ahmed" 
+            title="Worker" 
+            rating={4.5} 
+            imageUrl="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGVyc29ufGVufDB8fDB8fHww"
+            phone="01203837945" 
+            facebook="killer" 
+            whatsapp="1203837945"
+          />
+          <WorkerProfileCard 
+            name="Ahmed" 
+            title="Worker" 
+            rating={4.5} 
+            imageUrl="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGVyc29ufGVufDB8fDB8fHww"
+            phone="01203837945" 
+            facebook="killer" 
+            whatsapp="1203837945"
+          />
+          <WorkerProfileCard 
+            name="Ahmed" 
+            title="Worker" 
+            rating={4.5} 
+            imageUrl="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGVyc29ufGVufDB8fDB8fHww"
+            phone="01203837945" 
+            facebook="killer" 
+            whatsapp="1203837945"
+          />
+          <WorkerProfileCard 
+            name="Ahmed" 
+            title="Worker" 
+            rating={4.5} 
+            imageUrl="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGVyc29ufGVufDB8fDB8fHww"
+            phone="01203837945" 
+            facebook="killer" 
+            whatsapp="1203837945"
+          />
+          <WorkerProfileCard 
+            name="Ahmed" 
+            title="Worker" 
+            rating={4.5} 
+            imageUrl="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGVyc29ufGVufDB8fDB8fHww"
+            phone="01203837945" 
+            facebook="killer" 
+            whatsapp="1203837945"
+          />
+          <WorkerProfileCard 
+            name="Ahmed" 
+            title="Worker" 
+            rating={4.5} 
+            imageUrl="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGVyc29ufGVufDB8fDB8fHww"
+            phone="01203837945" 
+            facebook="killer" 
+            whatsapp="1203837945"
+          />
+          <WorkerProfileCard 
+            name="Ahmed" 
+            title="Worker" 
+            rating={4.5} 
+            imageUrl="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGVyc29ufGVufDB8fDB8fHww"
+            phone="01203837945" 
+            facebook="killer" 
+            whatsapp="1203837945"
+          />
+          <WorkerProfileCard 
+            name="Ahmed" 
+            title="Worker" 
+            rating={4.5} 
+            imageUrl="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGVyc29ufGVufDB8fDB8fHww"
+            phone="01203837945" 
+            facebook="killer" 
+            whatsapp="1203837945"
+          />
+          <WorkerProfileCard 
+            name="Ahmed" 
+            title="Worker" 
+            rating={4.5} 
+            imageUrl="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGVyc29ufGVufDB8fDB8fHww"
+            phone="01203837945" 
+            facebook="killer" 
+            whatsapp="1203837945"
+          />
+          <WorkerProfileCard 
+            name="Ahmed" 
+            title="Worker" 
+            rating={4.5} 
+            imageUrl="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGVyc29ufGVufDB8fDB8fHww"
+            phone="01203837945" 
+            facebook="killer" 
+            whatsapp="1203837945"
+          />
+          <WorkerProfileCard 
+            name="Ahmed" 
+            title="Worker" 
+            rating={4.5} 
+            imageUrl="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGVyc29ufGVufDB8fDB8fHww"
+            phone="01203837945" 
+            facebook="killer" 
+            whatsapp="1203837945"
+          />
+          <WorkerProfileCard 
+            name="Ahmed" 
+            title="Worker" 
+            rating={4.5} 
+            imageUrl="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGVyc29ufGVufDB8fDB8fHww"
+            phone="01203837945" 
+            facebook="killer" 
+            whatsapp="1203837945"
+          />
+        </div>
+      </div>
     </div>
   );
 }

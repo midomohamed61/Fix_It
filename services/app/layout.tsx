@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import {Roboto} from "next/font/google";
+import Header from "@/components/layouts/Header/Header";
+import Footer from "@/components/layouts/Footer/Footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,7 +31,9 @@ export default function RootLayout({children,}: Readonly<{children: React.ReactN
     <html lang="en">
       {/*className={`${geistSans.variable} ${geistMono.variable} antialiased`}  */}
       <body className={roboto.className +`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <Header/>
         {children}
+        <Footer/>
       </body>
     </html>
   );
