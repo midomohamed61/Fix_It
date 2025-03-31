@@ -1,9 +1,9 @@
 "use client"
 
-import {  useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button/Button";
-// import { useState } from "react";
+
 interface MobileMenuProps {
   isOpen: boolean;
   onClose: () => void;
@@ -17,7 +17,6 @@ interface MobileMenuProps {
 export default function MobileMenu({ isOpen, onClose, links }: MobileMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Close menu when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -34,7 +33,6 @@ export default function MobileMenu({ isOpen, onClose, links }: MobileMenuProps) 
     };
   }, [isOpen, onClose]);
 
-  // Prevent scrolling when menu is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -53,22 +51,16 @@ export default function MobileMenu({ isOpen, onClose, links }: MobileMenuProps) 
     <div className="fixed inset-0 bg-black bg-opacity-50 z-40">
       <div 
         ref={menuRef}
-        className="fixed top-0 right-0 h-full w-4/5 max-w-xs bg-light z-50 transform transition-transform duration-300 ease-in-out shadow-xl"
+        className="fixed top-0 right-0 h-full w-4/5 max-w-xs bg-[#23486A] z-50 transform transition-transform duration-300 ease-in-out shadow-xl"
       >
-        <div className="flex justify-between items-center p-4 border-b border-light">
-          <h2 className="text-xl font-bold text-primary">Menu</h2>
+        <div className="flex justify-between items-center p-4 border-b border-[#3B6790]">
+          <h2 className="text-xl font-bold text-[#EFB036]">Menu</h2>
           <Button 
             onClick={onClose}
             aria-label="Close menu"
-            className="text-secondary"
+            className="text-[#F5EEDC]"
           >
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              fill="none" 
-              viewBox="0 0 24 24" 
-              stroke="currentColor" 
-              className="w-6 h-6"
-            >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </Button>
@@ -80,13 +72,15 @@ export default function MobileMenu({ isOpen, onClose, links }: MobileMenuProps) 
               key={link.id} 
               href={link.href}
               onClick={onClose}
-              className="block px-4 py-3 text-secondary hover:bg-secondary hover:text-white transition-colors duration-200"
+              className="block px-4 py-3 text-[#F5EEDC] hover:bg-[#3B6790] transition-colors duration-200"
             >
               {link.title}
             </Link>
           ))}
           <div className="px-4 pt-6">
-            <Button className="btn btn-primary w-full">Get Started</Button>
+            <Button className="bg-[#EFB036] hover:bg-[#EFB036]/90 text-[#23486A] font-bold w-full">
+              Get Started
+            </Button>
           </div>
         </nav>
       </div>

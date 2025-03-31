@@ -14,6 +14,7 @@ interface ImageProps {
   priority?: boolean;
   rounded?: 'none' | 'sm' | 'md' | 'lg' | 'full';
   fallbackSrc?: string;
+  fill?: boolean;
   onClick?: () => void;
 }
 
@@ -27,6 +28,7 @@ export function CustomImage({
   priority = false,
   rounded = 'none',
   fallbackSrc = '/images/placeholder.jpg',
+  fill = false,
   onClick,
   ...props
 }: ImageProps & React.ComponentPropsWithoutRef<typeof Image>) {
@@ -37,6 +39,7 @@ export function CustomImage({
   useEffect(() => {
     setImgSrc(src);
     setError(false);
+    setIsLoading(true);
   }, [src]);
 
   const handleError = () => {
@@ -63,6 +66,7 @@ export function CustomImage({
       className={cn(
         'relative overflow-hidden',
         roundedClasses[rounded],
+        fill ? 'w-full h-full' : '',
         className
       )}
       onClick={onClick}
@@ -76,8 +80,9 @@ export function CustomImage({
       <Image
         src={imgSrc}
         alt={alt}
-        width={width || undefined}
-        height={height || undefined}
+        width={!fill ? width || undefined : undefined}
+        height={!fill ? height || undefined : undefined}
+        fill={fill}
         onError={handleError}
         onLoad={handleLoad}
         priority={priority}

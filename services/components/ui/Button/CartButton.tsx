@@ -34,7 +34,7 @@ const CartButton: React.FC<CartButtonProps> = ({
     <div className="flex-1">
       <Button
         onClick={handleAddToCart}
-        className="relative flex items-center justify-center bg-primary hover:bg-secondary text-white font-extrabold text-lg px-4 h-[50px] rounded-xl transition-all duration-300 ease-in-out group active:scale-95 w-full transform hover:-translate-y-1"
+        className="relative flex items-center justify-center bg-[#EFB036] hover:bg-[#EFB036]/90 text-[#23486A] font-extrabold text-lg px-4 h-[50px] rounded-xl transition-all duration-300 ease-in-out group active:scale-95 w-full transform hover:-translate-y-1"
         {...props}
       >
         <div className="flex items-center transition-transform duration-300 ease-in-out group-hover:scale-125">
@@ -44,7 +44,7 @@ const CartButton: React.FC<CartButtonProps> = ({
               viewBox="0 0 24 24" 
               width="30" 
               height="30"
-              className="transition-all duration-500 ease-in-out fill-white/70 group-hover:fill-white"
+              className="transition-all duration-500 ease-in-out fill-[#23486A]/70 group-hover:fill-[#23486A]"
             >
               <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2zm1.82-10L18 5H6.83l-1.38-3H1V2h3.27l4.49 9.23-1.35 2.42c-.16.28-.24.6-.24.94 0 1.1.9 2 2 2h10v-2H9.41c-.28 0-.5-.22-.5-.5l.03-.12.97-1.75h6.5c.75 0 1.41-.41 1.75-1.03L21 7h-2.18z" />
             </svg>
@@ -54,9 +54,8 @@ const CartButton: React.FC<CartButtonProps> = ({
           Add
         </span>
 
-        {/* Cart Count Badge */}
         {cartCount > 0 && (
-          <span className="absolute -top-2 -right-2 bg-danger text-white text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full animate-bounce shadow-md">
+          <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full animate-bounce shadow-md">
             {cartCount}
           </span>
         )}
