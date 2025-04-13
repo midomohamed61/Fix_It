@@ -5,13 +5,13 @@ import { CustomImage } from "@/components/ui/Images/Image";
 
 export default function LoginPage() {
   return (
-    <div className="bg-zinc-900 min-h-screen">
+    <div className="bg-[#F5EEDC] min-h-screen ">
     <div className="mx-auto grid max-w-6xl grid-cols-1 md:grid-cols-2 overflow-hidden rounded-xl shadow-lg">
       {/* Form Side */}
       <LoginForm />
       
       {/* Image Side */}
-      <div className="relative hidden h-full md:block">
+      <div className="relative hidden bg-amber-400  md:block">
         <CustomImage
           src="/images/login-background.jpg"
           fallbackSrc="/images/placeholder.jpg"

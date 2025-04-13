@@ -21,8 +21,8 @@ servicehub/
 │   │   │   └── [bookingId]/
 │   │   │       └── page.tsx      # Booking details
 │   │   └── profile/              # User profile
-│   │       └── page.tsx
-│   │
+│   │   |    └── page.tsx
+│   │   └── ser
 │   ├── admin/                    # Admin section (protected)
 │   │   ├── page.tsx              # Admin dashboard
 │   │   ├── layout.tsx            # Admin layout
@@ -67,6 +67,26 @@ servicehub/
 │   ├── layout.tsx                # Global layout (header/footer)
 │   └── page.tsx                  # Home page
 │
+├──Pages
+|   |
+|   ├── AboutPage
+|   |       └── aboutPage.tsx
+|   ├── ContactPage 
+|   |       └── contactPage.tsx
+|   ├── HomePage
+|   |       ├──Sections 
+|   |       |     ├── ApplaySection.tsx
+|   |       |     ├── MainSection.tsx
+|   |       |     ├── OurPrandsSections
+|   |       |     ├── OurServicesSecyion
+|   |       |     ├── statssection 
+|   |       |      
+|   |       └──Homepage.tsx
+|   |
+|
+|
+|
+|
 ├── components/                   # React components
 │   ├── ui/                       # Basic UI elements
 │   │   ├── Button/

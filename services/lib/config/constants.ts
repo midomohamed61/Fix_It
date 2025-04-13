@@ -24,6 +24,9 @@ export enum Languages {
     ORDERS = "orders",
     NEW = "new",
     EDIT = "edit",
+    MESSAGE = "messages",
+    ACTIVITYHISTORY="activity-history",
+    ServiceWorker = "serviceWorker"
   }
   
   export enum InputTypes {

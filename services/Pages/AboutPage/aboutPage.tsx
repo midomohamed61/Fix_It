@@ -1,9 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { CustomImage } from "@/components/ui/Images/Image";
 import Link from "@/components/ui/Link/Link";
-import { Button } from "@/components/ui/Button/Button";
 import { LoadingSkeleton } from "@/components/ui/LoadingSkeleton";
 
 // Dummy Feature component
@@ -63,10 +61,10 @@ const AboutUs = () => {
                     <p className="font-medium">
                         Our mission is to ensure every home enjoys safety and comfort with fast, secure services
                         delivered by truly experienced professionals. Whether you need an electrician,
-                        plumber, or deep cleaning — we're here for you.
+                        plumber, or deep cleaning — we&apos;re here for you.
                     </p>
                     <p className="font-medium">
-                        Our goal is not only to fix what's broken — but to build lasting peace of mind, one household at a time.
+                        Our goal is not only to fix what&apos;s broken — but to build lasting peace of mind, one household at a time.
                         Imagine being able to book a certified technician within 2 minutes — that’s the experience we deliver every day.
                     </p>
                 </div>

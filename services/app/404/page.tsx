@@ -1,133 +1,143 @@
-'use client';
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { Button } from '@/components/ui/Button/Button';
-import { Routes } from '@/lib/config/constants';
+import { useLocation} from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/Button/Button";
+import { motion } from "framer-motion";
+import Link from "@/components/ui/Link/Link";
+const NotFound = () => {
+  const location = useLocation();
+  const [mounted, setMounted] = useState(false);
 
-export default function NotFoundPage() {
-  const [position, setPosition] = useState({ x: 50, y: 50 });
-  const [opacity, setOpacity] = useState(0);
-  
-  
   useEffect(() => {
-    setOpacity(0);
-    const fadeTimer = setTimeout(() => {
-      setOpacity(1);
-    }, 300);
-    const animationInterval = setInterval(() => {
-      setPosition(prev => ({
-        x: prev.x + (Math.random() * 2 - 1),
-        y: prev.y + (Math.random() * 2 - 1)
-      }));
-    }, 50);
-    
-    return () => {
-      clearTimeout(fadeTimer);
-      clearInterval(animationInterval);
-    };
-  }, []);
-  
+    setMounted(true);
+    console.error(
+      "404 Error: User attempted to access non-existent route:",
+      location.pathname
+    );
+  }, [location.pathname]);
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.3,
+        delayChildren: 0.2
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 100
+      }
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-light flex flex-col items-center justify-center p-4">
-      <div className="max-w-lg w-full text-center relative">
-        {/* Animated 404 */}
-        <div 
-          className="transition-all duration-700 ease-in-out absolute w-full"
-          style={{ 
-            opacity: opacity,
-            transform: `translate(${position.x / 10}px, ${position.y / 10}px)`,
-          }}
-        >
-          <h1 className="text-9xl font-bold text-primary">404</h1>
-        </div>
-        
-        {/* Static content */}
-        <div className="mt-32 mb-8">
-          <h2 className="text-4xl font-bold text-secondary mb-4">Page Not Found</h2>
-          <div className="h-1 w-16 bg-warning mx-auto mb-6"></div>
-          <p className="text-secondary mb-8">
-            Oops! The page you&apos;re looking for seems to have wandered off into the digital wilderness.
-          </p>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F5EEDC] to-[#F5EEDC]/80">
+      <motion.div
+        initial="hidden"
+        animate={mounted ? "visible" : "hidden"}
+        variants={containerVariants}
+        className="max-w-3xl w-full px-4 py-12"
+      >
+        <div className="relative">
+          {/* Background decorative elements */}
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1, rotate: 45 }}
+            transition={{
+              type: "spring",
+              stiffness: 100,
+              delay: 0.5
+            }}
+            className="absolute -top-20 -left-16 w-40 h-40 rounded-full bg-[#EFB036]/20 z-0"
+          />
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{
+              type: "spring",
+              stiffness: 100,
+              delay: 0.8
+            }}
+            className="absolute -bottom-16 -right-16 w-64 h-64 rounded-full bg-[#4C7B8B]/10 z-0"
+          />
           
-          <div className="space-y-4">
-            <p className="text-secondary">
-              Let&apos;s get you back on track:
-            </p>
+          {/* Main content */}
+          <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 relative z-10 border border-[#3B6790]/10">
+            <motion.div variants={itemVariants} className="mb-6">
+              <span className="inline-block text-[#EFB036] font-extrabold text-7xl md:text-9xl">
+                404
+              </span>
+            </motion.div>
             
-            <div className="flex flex-col sm:flex-row justify-center gap-4 mt-6">
-              <Button 
-                onClick={() => window.history.back()} 
-                variant="secondary" 
-                className="flex items-center justify-center"
-              >
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  className="h-5 w-5 mr-2" 
-                  fill="none" 
-                  viewBox="0 0 24 24" 
-                  stroke="currentColor"
-                >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M10 19l-7-7m0 0l7-7m-7 7h18" 
-                  />
-                </svg>
-                Go Back
-              </Button>
-              
-              <Link href={Routes.ROOT} passHref>
-                <Button 
-                  variant="default" 
-                  className="flex items-center justify-center"
-                >
-                  <svg 
-                    xmlns="http://www.w3.org/2000/svg" 
-                    className="h-5 w-5 mr-2" 
-                    fill="none" 
-                    viewBox="0 0 24 24" 
-                    stroke="currentColor"
-                  >
-                    <path 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round" 
-                      strokeWidth={2} 
-                      d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" 
-                    />
-                  </svg>
-                  Return Home
+            <motion.h1 variants={itemVariants} className="text-[#23486A] text-3xl md:text-4xl font-bold mb-4">
+              Page Not Found
+            </motion.h1>
+            
+            <motion.div variants={itemVariants} className="h-1 w-20 bg-gradient-to-r from-[#EFB036] to-[#4C7B8B] mb-6" />
+            
+            <motion.p variants={itemVariants} className="text-[#3B6790] text-lg mb-8 max-w-lg">
+              The page you are looking for might have been removed, had its name changed,
+              or is temporarily unavailable.
+            </motion.p>
+            
+            <motion.div
+              variants={itemVariants}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Link to="/">
+                <Button className="bg-[#23486A] hover:bg-[#3B6790] text-white px-8 py-6 h-auto text-lg rounded-xl transition-all duration-300">
+                  Return to Homepage
                 </Button>
               </Link>
-            </div>
+            </motion.div>
           </div>
         </div>
         
-        {/* Visual elements */}
-        <div className="hidden sm:block absolute -top-16 -left-16 w-32 h-32 bg-info bg-opacity-20 rounded-full"></div>
-        <div className="hidden sm:block absolute -bottom-16 -right-16 w-32 h-32 bg-primary bg-opacity-20 rounded-full"></div>
-        <div className="hidden sm:block absolute top-1/4 right-0 w-16 h-16 bg-danger bg-opacity-10 rounded-full"></div>
-        <div className="hidden sm:block absolute bottom-1/4 left-0 w-16 h-16 bg-success bg-opacity-10 rounded-full"></div>
-      </div>
-      
-      {/* Status cards */}
-      <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-4 max-w-md">
-        <div className="bg-white p-4 rounded-lg shadow-md border-t-4 border-primary text-center">
-          <h3 className="font-bold text-primary">Lost?</h3>
-          <p className="text-secondary text-sm">We couldn&apos;t find the page you requested.</p>
+        {/* Animated elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {[...Array(6)].map((_, i) => (
+            <motion.div
+              key={i}
+              initial={{ 
+                x: Math.random() * window.innerWidth, 
+                y: -20,
+                opacity: 0.3 + Math.random() * 0.5,
+                scale: 0.1 + Math.random() * 0.3
+              }}
+              animate={{ 
+                y: window.innerHeight + 50,
+                rotate: Math.random() * 360
+              }}
+              transition={{
+                duration: 15 + Math.random() * 20,
+                repeat: Infinity,
+                delay: i * 2,
+                ease: "linear"
+              }}
+              className={`absolute w-8 h-8 rounded-full bg-[${
+                [
+                  "#EFB036",
+                  "#3B6790",
+                  "#23486A",
+                  "#4C7B8B"
+                ][i % 4]
+              }]/10`}
+            />
+          ))}
         </div>
-        
-        <div className="bg-white p-4 rounded-lg shadow-md border-t-4 border-warning text-center">
-          <h3 className="font-bold text-secondary">Need Help?</h3>
-          <p className="text-secondary text-sm">Visit our support center for assistance.</p>
-        </div>
-        
-        <div className="bg-white p-4 rounded-lg shadow-md border-t-4 border-success text-center">
-          <h3 className="font-bold text-secondary">Report Issue</h3>
-          <p className="text-secondary text-sm">Let us know about any problems.</p>
-        </div>
-      </div>
+      </motion.div>
     </div>
   );
-}
+};
+
+export default NotFound;

@@ -1,14 +1,16 @@
 "use client";
 
 import React, { useState, useEffect, memo } from 'react';
-import { Users, Trophy, Coffee, FolderCheck } from 'lucide-react';
+import { FaUsers, FaAward, FaClock, FaBuilding, FaHandshake, FaStar } from 'react-icons/fa';
 
 // Memoized Loading Skeleton Component
+// eslint-disable-next-line react/display-name
 const LoadingSkeleton = memo(({ className }: { className: string }) => (
-  <div className={`bg-gray-300 animate-pulse rounded ${className}`}></div>
+  <div className={`bg-[#3B6790]/20 animate-pulse rounded ${className}`}></div>
 ));
 
 // Memoized Animated Number Component
+// eslint-disable-next-line react/display-name
 const AnimatedNumber = memo(({ value }: { value: number }) => {
   const [current, setCurrent] = useState(0);
 
@@ -30,20 +32,21 @@ const AnimatedNumber = memo(({ value }: { value: number }) => {
     return () => clearInterval(timer);
   }, [value]);
 
-  return <span>{current.toLocaleString()}</span>;
+  return <span className="text-[#EFB036]">{current.toLocaleString()}</span>;
 });
 
 // Memoized Stat Card Component
-const StatCard = memo(({ stat }: { stat: any }) => (
-  <div className="text-center group">
-    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors duration-300 mb-4">
-      {React.createElement(stat.icon, { className: "w-8 h-8 text-primary" })}
+// eslint-disable-next-line react/display-name
+const StatCard = memo(({ stat }: { stat: unknown }) => (
+  <div className="text-center group transition-all duration-300 hover:scale-105">
+    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#23486A] group-hover:bg-[#3B6790] transition-colors duration-300 mb-4 shadow-md">
+      {React.createElement(stat.icon, { className: "w-8 h-8 text-[#EFB036] " })}
     </div>
-    <div className="text-3xl font-bold text-primary mb-2">
+    <div className="text-3xl font-bold text-[#EFB036] mb-2">
       <AnimatedNumber value={stat.value} />
       {stat.value >= 1000 ? 'k' : ''}
     </div>
-    <div className="text-muted-foreground capitalize">{stat.label}</div>
+    <div className="text-[#F1EFEC] capitalize font-medium">{stat.label}</div>
   </div>
 ));
 
@@ -62,33 +65,43 @@ export default function StatsSection() {
     {
       value: 451000,
       label: "skilled workers",
-      icon: Users,
+      icon: FaUsers,
     },
     {
       value: 12,
       label: "industry awards",
-      icon: Trophy,
+      icon: FaAward,
     },
     {
       value: 154000,
       label: "hours of training",
-      icon: Coffee,
+      icon: FaClock,
     },
     {
       value: 45,
       label: "global offices",
-      icon: FolderCheck,
+      icon: FaBuilding,
+    },
+    {
+      value: 100,
+      label: "successful partnerships",
+      icon: FaHandshake,
+    },
+    {
+      value: 5000,
+      label: "user ratings",
+      icon: FaStar,
     },
   ];
 
   if (isLoading) {
     return (
-      <div className="relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-background/50 to-background"></div>
+      <div className="relative bg-[#F5EEDC]">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#F5EEDC]/50 to-[#F5EEDC]"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           <LoadingSkeleton className="h-12 w-3/4 mx-auto mb-16" />
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {[...Array(4)].map((_, i) => (
+          <div className="grid grid-cols-6 gap-8">
+            {[...Array(6)].map((_, i) => (
               <div key={i} className="text-center">
                 <LoadingSkeleton className="h-16 w-16 mx-auto mb-4 rounded-full" />
                 <LoadingSkeleton className="h-8 w-24 mx-auto mb-2" />
@@ -104,7 +117,7 @@ export default function StatsSection() {
   return (
     <>
       {/* Hero Section */}
-      <div className="relative overflow-hidden" style={{ height: '50vh' }}>
+      <div className="relative overflow-hidden bg-[#F5EEDC]" style={{ height: '50vh' }}>
         {/* Background Image */}
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20"
@@ -116,14 +129,12 @@ export default function StatsSection() {
         ></div>
         {/* Overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-background/50 to-background"></div>
-
         {/* Content */}
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-          <h1 className="text-4xl md:text-5xl font-bold text-center text-primary mb-16">
-            Empowering Global Workforce Excellence
+          <h1 className="text-4xl md:text-5xl font-bold text-center text-[#EFB036] mb-10">
+            Elevating Workforce Excellence Worldwide
           </h1>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-6 gap-8 justify-center">
             {stats.map((stat, index) => (
               <StatCard key={index} stat={stat} />
             ))}

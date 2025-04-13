@@ -9,7 +9,7 @@ export default function RegisterPage() {
     <div className="mx-auto grid max-w-6xl grid-cols-1 md:grid-cols-2 overflow-hidden rounded-xl shadow-lg">
       {/* Form Side */}
       <RegisterForm />
-      
+    
       {/* Image Side */}
       <div className="relative hidden h-full md:block">
         <CustomImage

@@ -1,228 +1,335 @@
 'use client';
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Label } from '../../components/ui/Form/Label';
-import { Input } from '../../components/ui/Form/Input';
-import { Button } from '../../components/ui/Button/Button';
-import { cn } from '../../lib/utils/formatting';
-import { register } from '../../app/(auth)/register/actions';
+import { Label } from '@/components/ui/Form/Label';
+import { Input } from '@/components/ui/Form/Input';
+import { Button } from '@/components/ui/Button/Button';
+import { cn } from '@/lib/utils/formatting';
+import { register } from '@/app/(auth)/register/actions';
+import { FaApple, FaEye, FaEyeSlash, FaFacebook, FaGoogle } from 'react-icons/fa';
+import { HiOutlineMail, HiOutlineLockClosed, HiOutlineUser } from 'react-icons/hi';
+import { storage } from '@/lib/utils/storage';
 
 export default function RegisterForm() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [name, setName] = useState('');
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError('');
-  
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      setIsLoading(false);
+  useEffect(() => {
+    // Client-side only check
+    if (typeof window === 'undefined') return;
+
+    const token = storage.getToken();
+    if (token) {
+      router.push('/dashboard');
       return;
     }
 
+    const rememberedEmail = storage.getRememberedEmail();
+    if (rememberedEmail) {
+      setFormData(prev => ({ ...prev, email: rememberedEmail }));
+      setRememberMe(true);
+    }
+  }, [router]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({ ...prev, [id]: value }));
+  };
+
+  const validatePassword = (password: string): boolean => {
+    return password.length >= 8 && /[A-Z]/.test(password) && /[0-9]/.test(password);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    // Validation
+    if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
+      setError('Please fill in all fields');
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    if (!validatePassword(formData.password)) {
+      setError('Password must be at least 8 characters with 1 uppercase and 1 number');
+      return;
+    }
+
+    // Client-side check for existing user
+    if (typeof window !== 'undefined' && storage.getUserByEmail(formData.email)) {
+      setError('Account already exists');
+      return;
+    }
+
+    setIsLoading(true);
+
     try {
-      const result = await register({ name, email, password });
+      const result = await register(formData);
       
-      if (result.error) {
+      if (result?.error) {
         setError(result.error);
-        setIsLoading(false);
-      } else if (result.success) {
+      } else if (result?.success) {
+        // Client-side operations only
+        if (typeof window !== 'undefined') {
+          // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+          rememberMe 
+            ? storage.setRememberedEmail(formData.email)
+            : storage.clearRememberedEmail();
+          
+          // Demo only - in real app, use token from server
+          storage.setToken(`demo-token-${crypto.randomUUID()}`);
+          
+          // Create user in local storage (demo only)
+          storage.setUser({
+            name: formData.name,
+            email: formData.email,
+            password: formData.password,
+            createdAt:0,
+
+          });
+        }
+
+        alert('Registration successful!');
         router.push('/dashboard');
       }
     } catch (error) {
       console.error('Registration failed:', error);
       setError('An unexpected error occurred');
+    } finally {
       setIsLoading(false);
     }
   };
-
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-900 px-4 py-12 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md overflow-hidden rounded-lg bg-black p-8">
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-white">Create account</h1>
-          <p className="mt-2 text-gray-400">Sign up for your Acme Inc account</p>
+    <div className="min-h-screen bg-[#17446d] flex items-center justify-center p-4">
+      <div className="w-full max-w-md bg-[#23486A] rounded-xl overflow-hidden shadow-[0_0_20px_2px_rgba(239,176,54,0.3)] border-2 border-[#EFB036]/30 hover:shadow-[0_0_25px_5px_rgba(239,176,54,0.4)] hover:border-[#EFB036]/50">
+        <div className="p-6 text-center border-b border-[#EFB036]/20">
+          <h1 className="text-2xl font-bold text-[#EFB036]">Create Account</h1>
+          <p className="text-[#F5EEDC] mt-1">Join our community</p>
         </div>
-        
-        {error && (
-          <div className="mb-4 rounded-md bg-red-900/20 p-3 text-sm text-red-400">
-            {error}
-          </div>
-        )}
-        
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <Label htmlFor="name" className="block text-sm font-medium text-white">Full Name</Label>
-            <Input
-              id="name"
-              name="name"
-              type="text"
-              placeholder="John Doe"
-              required
-              className="mt-1 block w-full rounded-md border border-zinc-700 bg-black px-3 py-2 text-white placeholder-gray-500 focus:border-[#6A1B9A] focus:outline-none focus:ring-1 focus:ring-[#6A1B9A]"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </div>
 
-          <div>
-            <Label htmlFor="email" className="block text-sm font-medium text-white">Email</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="m@example.com"
-              required
-              className="mt-1 block w-full rounded-md border border-zinc-700 bg-black px-3 py-2 text-white placeholder-gray-500 focus:border-[#6A1B9A] focus:outline-none focus:ring-1 focus:ring-[#6A1B9A]"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="password" className="block text-sm font-medium text-white">Password</Label>
-            <div className="relative">
-              <Input
-                id="password"
-                name="password"
-                type={showPassword ? "text" : "password"}
-                required
-                className="mt-1 block w-full rounded-md border border-zinc-700 bg-black px-3 py-2 text-white placeholder-gray-500 focus:border-[#6A1B9A] focus:outline-none focus:ring-1 focus:ring-[#6A1B9A]"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <button
-                type="button"
-                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-white"
-                onClick={togglePasswordVisibility}
-              >
-                {showPassword ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
-                  </svg>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                )}
-              </button>
+        <div className="p-6 space-y-6">
+          {isLoading && (
+            <div className="bg-[#4C7B8B] text-[#F5EEDC] p-3 rounded-lg text-center animate-pulse border border-[#EFB036]/20">
+              Creating account...
             </div>
-          </div>
-
-          <div>
-            <Label htmlFor="confirmPassword" className="block text-sm font-medium text-white">Confirm Password</Label>
-            <div className="relative">
-              <Input
-                id="confirmPassword"
-                name="confirmPassword"
-                type={showPassword ? "text" : "password"}
-                required
-                className="mt-1 block w-full rounded-md border border-zinc-700 bg-black px-3 py-2 text-white placeholder-gray-500 focus:border-[#6A1B9A] focus:outline-none focus:ring-1 focus:ring-[#6A1B9A]"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-              />
-              <button
-                type="button"
-                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-white"
-                onClick={togglePasswordVisibility}
-              >
-                {showPassword ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
-                  </svg>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                )}
-              </button>
+          )}
+          
+          {error && (
+            <div className="bg-[#EFB036] text-[#23486A] p-3 rounded-lg text-center font-medium border border-[#EFB036]/70">
+              {error}
             </div>
-          </div>
+          )}
 
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className={cn(
-              "btn btn-primary w-full",
-              isLoading && "opacity-70 cursor-not-allowed"
-            )}
-          >
-            {isLoading ? "Creating account..." : "Sign up"}
-          </Button>
-        </form>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <Label htmlFor="name" className="block text-[#F5EEDC] mb-2">
+                Full Name
+              </Label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#4C7B8B]">
+                  <HiOutlineUser className="h-5 w-5" />
+                </div>
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="John Doe"
+                  required
+                  className="w-full pl-10 bg-[#F5EEDC] text-[#23486A] border border-[#4C7B8B] focus:ring-2 focus:ring-[#EFB036] focus:border-transparent"
+                  value={formData.name}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+            
+            <div>
+              <Label htmlFor="email" className="block text-[#F5EEDC] mb-2">
+                Email Address
+              </Label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#4C7B8B]">
+                  <HiOutlineMail className="h-5 w-5" />
+                </div>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  required
+                  className="w-full pl-10 bg-[#F5EEDC] text-[#23486A] border border-[#4C7B8B] focus:ring-2 focus:ring-[#EFB036] focus:border-transparent"
+                  value={formData.email}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+            
+            <div>
+              <Label htmlFor="password" className="block text-[#F5EEDC] mb-2">
+                Password
+              </Label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#4C7B8B]">
+                  <HiOutlineLockClosed className="h-5 w-5" />
+                </div>
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  className="w-full pl-10 bg-[#F5EEDC] text-[#23486A] border border-[#4C7B8B] focus:outline-none focus:ring-2 focus:ring-[#EFB036] focus:border-transparent"
+                  value={formData.password}
+                  onChange={handleChange}
+                />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#4C7B8B] hover:text-[#EFB036]"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <FaEyeSlash className="h-5 w-5" /> : <FaEye className="h-5 w-5" />}
+                </button>
+              </div>
+              <p className="mt-1 text-xs text-[#F5EEDC]">
+                Must be 8+ chars with uppercase and number
+              </p>
+            </div>
+            
+            <div>
+              <Label htmlFor="confirmPassword" className="block text-[#F5EEDC] mb-2">
+                Confirm Password
+              </Label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#4C7B8B]">
+                  <HiOutlineLockClosed className="h-5 w-5" />
+                </div>
+                <Input
+                  id="confirmPassword"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  className="w-full pl-10 bg-[#F5EEDC] text-[#23486A] border border-[#4C7B8B] focus:outline-none focus:ring-2 focus:ring-[#EFB036] focus:border-transparent"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
 
-        <div className="mt-6">
+            <div className="flex items-center">
+              <input
+                id="remember-me"
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="h-4 w-4 text-[#EFB036] focus:ring-[#EFB036] border-[#4C7B8B] rounded"
+              />
+              <label htmlFor="remember-me" className="ml-2 block text-sm text-[#F5EEDC]">
+                Remember me
+              </label>
+            </div>
+            
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className={cn(
+                "w-full py-2 px-4 bg-[#EFB036] hover:bg-[#e6a72b] text-[#23486A] font-medium rounded-lg transition-colors flex items-center justify-center",
+                "border-2 border-[#EFB036]/70 hover:border-[#EFB036]",
+                "shadow-[0_4px_10px_rgba(239,176,54,0.3)] hover:shadow-[0_6px_15px_rgba(239,176,54,0.4)]",
+                isLoading && "opacity-70 cursor-not-allowed"
+              )}
+            >
+              {isLoading ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-[#23486A]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Creating account...
+                </>
+              ) : (
+                "Sign Up"
+              )}
+            </Button>
+          </form>
+
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-zinc-700"></div>
+              <div className="w-full border-t border-[#EFB036]/30"></div>
             </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="bg-black px-2 text-gray-400">Or sign up with</span>
+            <div className="relative flex justify-center">
+              <span className="px-2 bg-[#3B6790] text-[#F5EEDC] text-sm">
+                Or sign up with
+              </span>
             </div>
           </div>
-
-          <div className="mt-6 grid grid-cols-3 gap-3">
-            <Button
+          
+          <div className="grid grid-cols-3 gap-3">
+            <Button  
               type="button"
-              className="flex items-center justify-center rounded-md border border-zinc-700 bg-black px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800"
+              className={cn(
+                "flex justify-center items-center py-2 px-4 rounded-lg transition-all",
+                "bg-[#e6a72b] hover:bg-[#e6a72b]/90 text-[#F5EEDC] hover:text-[#23486A]",
+                "border border-[#EFB036]/50 hover:border-[#EFB036]",
+                "shadow-[0_2px_8px_rgba(239,176,54,0.2)] hover:shadow-[0_4px_12px_rgba(239,176,54,0.3)]"
+              )}
             >
-              <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09z" />
-              </svg>
+              <FaApple className="h-5 w-5" />
             </Button>
             <Button
               type="button"
-              className="flex items-center justify-center rounded-md border border-zinc-700 bg-black px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800"
+              className={cn(
+                "flex justify-center items-center py-2 px-4 rounded-lg transition-all",
+                "bg-[#e6a72b] hover:bg-[#e6a72b]/90 text-[#F5EEDC] hover:text-[#23486A]",
+                "border border-[#EFB036]/50 hover:border-[#EFB036]",
+                "shadow-[0_2px_8px_rgba(239,176,54,0.2)] hover:shadow-[0_4px_12px_rgba(239,176,54,0.3)]"
+              )}
             >
-              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" />
-              </svg>
+              <FaGoogle className="h-5 w-5" />
             </Button>
             <Button
               type="button"
-              className="flex items-center justify-center rounded-md border border-zinc-700 bg-black px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800"
+              className={cn(
+                "flex justify-center items-center py-2 px-4 rounded-lg transition-all",
+                "bg-[#e6a72b] hover:bg-[#e6a72b]/90 text-[#F5EEDC] hover:text-[#23486A]",
+                "border border-[#EFB036]/50 hover:border-[#EFB036]",
+                "shadow-[0_2px_8px_rgba(239,176,54,0.2)] hover:shadow-[0_4px_12px_rgba(239,176,54,0.3)]"
+              )}
             >
-              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M6.915 4.03c-1.968 0-3.683 1.28-4.871 3.113C.704 9.208 0 11.883 0 14.449c0 .706.07 1.369.21 1.973a6.624 6.624 0 0 0 .265.86 5.297 5.297 0 0 0 .371.761c.696 1.159 1.818 1.927 3.593 1.927 1.497 0 2.633-.671 3.965-2.444.76-1.012 1.144-1.626 2.663-4.32l.756-1.339.186-.325c.061.1.121.196.183.3l2.152 3.595c.724 1.21 1.665 2.556 2.47 3.314 1.046.987 1.992 1.22 3.06 1.22 1.075 0 1.876-.355 2.455-.843a3.743 3.743 0 0 0 .81-.973c.542-.939.861-2.127.861-3.745 0-2.72-.681-5.357-2.084-7.45-1.282-1.912-2.957-2.93-4.716-2.93-1.047 0-2.088.467-3.053 1.308-.652.57-1.257 1.29-1.82 2.05-.69-.875-1.335-1.547-1.958-2.056-1.182-.966-2.315-1.303-3.454-1.303z" />
-              </svg>
+              <FaFacebook className="h-5 w-5" />
             </Button>
           </div>
         </div>
-
-        <div className="mt-6 text-center text-sm text-gray-400">
-          Already have an account?{' '}
-          <Link href="/login" className="font-medium text-[#6A1B9A] hover:underline">
-            Login
-          </Link>
+        
+        <div className="bg-[#3B6790] px-6 py-4 text-center border-t border-[#EFB036]/20">
+          <p className="text-[#F5EEDC] text-sm">
+            Already have an account?{' '}
+            <Link 
+              href="/login" 
+              className="text-[#EFB036] font-medium hover:underline hover:text-[#F5EEDC] transition-colors"
+            >
+              Login
+            </Link>
+          </p>
+          <p className="mt-2 text-[#F5EEDC] text-xs">
+            By continuing, you agree to our{' '}
+            <Link href="/terms" className="text-[#EFB036] hover:underline hover:text-[#F5EEDC] transition-colors">
+              Terms
+            </Link>{' '}
+            and{' '}
+            <Link href="/privacy" className="text-[#EFB036] hover:underline hover:text-[#F5EEDC] transition-colors">
+              Privacy Policy
+            </Link>
+          </p>
         </div>
-      </div>
-      
-      <div className="mt-8 text-center text-xs text-gray-500 absolute bottom-4">
-        By signing up, you agree to our{' '}
-        <Link href="/terms" className="text-gray-400 hover:text-[#6A1B9A]">
-          Terms of Service
-        </Link>{' '}
-        and{' '}
-        <Link href="/privacy" className="text-gray-400 hover:text-[#6A1B9A]">
-          Privacy Policy
-        </Link>
-        .
       </div>
     </div>
   );

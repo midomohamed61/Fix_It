@@ -4,18 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from '../Link/Link';
 import { Button } from '../Button/Button';
 import CartButton from '../Button/CartButton';
-import { motion } from 'framer-motion';
-
-interface WorkerCardProps {
-  name?: string;
-  title?: string;
-  rating?: number;
-  imageUrl?: string;
-  phone?: string;
-  facebook?: string;
-  whatsapp?: string;
-  isLoading?: boolean;
-}
+import ShimmerSkeleton from '@/components/ui/ShimmerSkeleton';
 
 const WorkerCard = ({
   name = "Christopher Anderson",
@@ -26,7 +15,7 @@ const WorkerCard = ({
   whatsapp = "1234567890",
   phone = "+1234567890",
   isLoading = false
-}: WorkerCardProps) => {
+}) => {
   const [isCardHovered, setIsCardHovered] = useState(false);
   const [gradientPosition, setGradientPosition] = useState(0);
   const [isWhatsappHovered, setIsWhatsappHovered] = useState(false);
@@ -43,7 +32,7 @@ const WorkerCard = ({
     return () => clearInterval(interval);
   }, []);
 
-  const renderStars = (rating: number) => {
+  const renderStars = (rating) => {
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 >= 0.5;
     
@@ -69,7 +58,7 @@ const WorkerCard = ({
 
   // Container style with gradient border effect
   const containerStyle = {
-    position: 'relative' as const,
+    position: 'relative',
     width: 'fit-content',
     padding: isCardHovered ? '3px' : '0px',
     borderRadius: '1.6rem',
@@ -80,7 +69,7 @@ const WorkerCard = ({
 
   // Gradient border style
   const gradientBorderStyle = {
-    position: 'absolute' as const,
+    position: 'absolute',
     inset: 0,
     borderRadius: '1.6rem',
     padding: '3px',
@@ -121,25 +110,8 @@ const WorkerCard = ({
     setImageError(true);
   };
 
-  // Skeleton component with Framer Motion
-  const Skeleton = ({ className = "" }: { className?: string }) => (
-    <motion.div
-      className={`bg-[#3B6790]/20 rounded-md ${className}`}
-      initial={{ opacity: 0.5 }}
-      animate={{ 
-        opacity: [0.5, 0.8, 0.5],
-        scale: [1, 1.02, 1],
-      }}
-      transition={{
-        duration: 1.5,
-        repeat: Infinity,
-        ease: "easeInOut"
-      }}
-    />
-  );
-
   return (
-    <div style={containerStyle} className="w-full max-w-xs mx-auto"
+    <div style={containerStyle} className="w-full max-w-xs mx-auto mt-6"
       onMouseEnter={() => setIsCardHovered(true)}
       onMouseLeave={() => setIsCardHovered(false)}
     >
@@ -164,7 +136,7 @@ const WorkerCard = ({
           : '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
         overflow: 'hidden',
         backgroundColor: '#F5EEDC',
-        position: 'relative' as const,
+        position: 'relative',
         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         transform: isCardHovered ? 'scale(1.02)' : 'scale(1)'
       }}>
@@ -193,11 +165,11 @@ const WorkerCard = ({
           transition: 'transform 0.5s ease'
         }}>
           {isLoading ? (
-            <Skeleton className="w-full h-full" />
+            <ShimmerSkeleton height="12rem" borderRadius="0" />
           ) : (
             <div className="w-full h-full relative overflow-hidden">
               {isImageLoading && (
-                <Skeleton className="absolute inset-0" />
+                <ShimmerSkeleton height="12rem" borderRadius="0" className="absolute inset-0" />
               )}
               <img
                 src={imageError ? '/images/placeholder.jpg' : imageUrl}
@@ -225,7 +197,7 @@ const WorkerCard = ({
         }}>
           {/* Name */}
           {isLoading ? (
-            <Skeleton className="w-32 h-6" />
+            <ShimmerSkeleton width="60%" height="1.5rem" borderRadius="0.25rem" />
           ) : (
             <h2 style={{ 
               fontSize: '1.25rem', 
@@ -238,7 +210,7 @@ const WorkerCard = ({
 
           {/* Title */}
           {isLoading ? (
-            <Skeleton className="w-40 h-4" />
+            <ShimmerSkeleton width="80%" height="1rem" borderRadius="0.25rem" />
           ) : (
             <p style={{ 
               fontSize: '0.875rem',
@@ -250,7 +222,7 @@ const WorkerCard = ({
 
           {/* Rating */}
           {isLoading ? (
-            <Skeleton className="w-28 h-6" />
+            <ShimmerSkeleton width="40%" height="1.5rem" borderRadius="0.25rem" />
           ) : (
             <div>
               {renderStars(rating)}
@@ -261,7 +233,7 @@ const WorkerCard = ({
           {isLoading ? (
             <div className="flex gap-3 mt-2">
               {[1, 2, 3].map((_, index) => (
-                <Skeleton key={index} className="w-10 h-10 rounded-full" />
+                <ShimmerSkeleton key={index} width="2.5rem" height="2.5rem" borderRadius="50%" />
               ))}
             </div>
           ) : (
@@ -315,8 +287,8 @@ const WorkerCard = ({
           {/* Buttons */}
           {isLoading ? (
             <div className="flex justify-between w-full p-4 gap-3">
-              <Skeleton className="flex-[2] h-[50px] rounded-xl" />
-              <Skeleton className="flex-1 h-[50px] rounded-xl" />
+              <ShimmerSkeleton width="67%" height="50px" borderRadius="0.75rem" />
+              <ShimmerSkeleton width="30%" height="50px" borderRadius="0.75rem" />
             </div>
           ) : (
             <div className="flex justify-between w-full p-4 gap-3">

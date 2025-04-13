@@ -38,6 +38,7 @@ const CartButton: React.FC<CartButtonProps> = ({
         {...props}
       >
         <div className="flex items-center transition-transform duration-300 ease-in-out group-hover:scale-125">
+          
           <div className="transition-transform duration-300 ease-in-out group-hover:translate-x-5 group-hover:scale-110">
             <svg 
               xmlns="http://www.w3.org/2000/svg" 
@@ -65,3 +66,6 @@ const CartButton: React.FC<CartButtonProps> = ({
 };
 
 export default React.memo(CartButton);
+
+
+
