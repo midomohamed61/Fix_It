@@ -141,7 +141,7 @@ const WorkersSection = () => {
       category: "Design"
     }
   ];
-   // State management
+  // State management
   const [workers, setWorkers] = useState(allWorkers);
   const [visibleWorkers, setVisibleWorkers] = useState(4);
   const [isLoading, setIsLoading] = useState(false);
@@ -155,21 +155,21 @@ const WorkersSection = () => {
   // Filter workers
   useEffect(() => {
     let filtered = allWorkers;
-    
+
     if (searchTerm) {
       filtered = filtered.filter(worker =>
         worker.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         worker.title.toLowerCase().includes(searchTerm.toLowerCase()))
     }
-    
+
     if (selectedCategory !== 'All Categories') {
       filtered = filtered.filter(worker => worker.category === selectedCategory);
     }
-    
+
     if (ratingFilter > 0) {
       filtered = filtered.filter(worker => worker.rating >= ratingFilter);
     }
-    
+
     setWorkers(filtered);
     setVisibleWorkers(4);
     setHasMore(filtered.length > 4);
@@ -178,9 +178,9 @@ const WorkersSection = () => {
   // Load more workers
   const loadMoreWorkers = useCallback(() => {
     if (isLoading || !hasMore) return;
-    
+
     setIsLoading(true);
-    
+
     setTimeout(() => {
       setVisibleWorkers(prev => {
         const newVisible = prev + 4;
@@ -194,13 +194,13 @@ const WorkersSection = () => {
   // Infinite scroll handler
   useEffect(() => {
     const currentContainer = containerRef.current;
-    
+
     const handleScroll = () => {
       if (!currentContainer || isLoading || !hasMore) return;
-      
+
       const { scrollTop, scrollHeight, clientHeight } = currentContainer;
       const isNearBottom = scrollTop + clientHeight >= scrollHeight - 100;
-      
+
       if (isNearBottom) {
         loadMoreWorkers();
       }
@@ -213,13 +213,13 @@ const WorkersSection = () => {
   }, [loadMoreWorkers, isLoading, hasMore]);
 
   return (
-    <section className="relative py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#23486A] to-[#3B6790]">
+    <section className="relative py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#23486A] to-[#3B6790]" id="our-workers">
       {/* Decorative elements */}
       <div className="absolute inset-0 overflow-hidden opacity-10">
         <div className="absolute top-0 left-0 w-1/3 h-1/3 bg-[#EFB036] rounded-full filter blur-3xl"></div>
         <div className="absolute bottom-0 right-0 w-1/3 h-1/3 bg-[#4C7B8B] rounded-full filter blur-3xl"></div>
       </div>
-      
+
       <div className="relative max-w-7xl mx-auto">
         {/* Section header */}
         <div className="text-center mb-12">
@@ -245,9 +245,9 @@ const WorkersSection = () => {
               placeholder="Search workers..."
             />
           </div>
-          
+
           <div className="flex gap-3 w-full md:w-auto">
-            <select 
+            <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
               className="block w-full px-4 py-2 border border-[#3B6790]/30 rounded-lg bg-white text-[#23486A] focus:outline-none focus:ring-2 focus:ring-[#EFB036] focus:border-transparent transition-all duration-200"
@@ -260,8 +260,8 @@ const WorkersSection = () => {
               <option value="Painting">Painting</option>
               <option value="Design">Design</option>
             </select>
-            
-            <Button 
+
+            <Button
               onClick={() => setShowFilters(!showFilters)}
               className="flex items-center gap-2 px-4 py-2 bg-[#EFB036] text-[#23486A] font-semibold rounded-lg hover:bg-[#EFB036]/90 hover:shadow-md active:scale-95 transition-all duration-200 shadow-sm"
             >
@@ -293,17 +293,17 @@ const WorkersSection = () => {
         )}
 
         {/* Scrollable workers container with custom scrollbar */}
-        <div 
+        <div
           ref={containerRef}
           className="flex flex-wrap justify-center gap-6 overflow-y-auto pb-8"
-          style={{ 
+          style={{
             maxHeight: '70vh',
             scrollbarWidth: 'thin',
             scrollbarColor: '#EFB036 #3B6790'
           }}
         >
           {workers.slice(0, visibleWorkers).map((worker) => (
-            <div 
+            <div
               key={worker.id}
               className="flex-none w-full sm:w-[calc(50%-12px)] md:w-[calc(33.333%-16px)] lg:w-[calc(25%-18px)]"
             >
@@ -315,7 +315,12 @@ const WorkersSection = () => {
                 phone={worker.phone}
                 facebook={worker.facebook}
                 whatsapp={worker.whatsapp}
+                onAboutClick={() => {
+                  localStorage.setItem('selectedWorker', JSON.stringify(worker));
+                  window.location.href = '/details';
+                }}
               />
+
             </div>
           ))}
           {isLoading && (
@@ -323,7 +328,7 @@ const WorkersSection = () => {
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#EFB036]"></div>
             </div>
           )}
-          
+
           {!hasMore && workers.length > 0 && (
             <div className="w-full text-center py-8 text-[#F5EEDC]">
               You&apos;ve viewed all available workers
@@ -339,7 +344,7 @@ const WorkersSection = () => {
         {/* Manual load more button */}
         {hasMore && !isLoading && workers.length > 0 && (
           <div className="text-center mt-8">
-            <Button 
+            <Button
               onClick={loadMoreWorkers}
               className="px-8 py-3 bg-[#EFB036] text-[#23486A] font-bold rounded-xl hover:bg-[#EFB036]/90 transition-colors shadow-lg hover:shadow-xl"
             >
