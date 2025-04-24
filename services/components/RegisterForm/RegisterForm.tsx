@@ -6,10 +6,10 @@ import { Label } from '@/components/ui/Form/Label';
 import { Input } from '@/components/ui/Form/Input';
 import { Button } from '@/components/ui/Button/Button';
 import { cn } from '@/lib/utils/formatting';
-import { register } from '@/app/(auth)/register/actions';
 import { FaApple, FaEye, FaEyeSlash, FaFacebook, FaGoogle } from 'react-icons/fa';
 import { HiOutlineMail, HiOutlineLockClosed, HiOutlineUser } from 'react-icons/hi';
 import { storage } from '@/lib/utils/storage';
+import { Pages } from '@/lib/config/constants';
 
 export default function RegisterForm() {
   const [formData, setFormData] = useState({
@@ -25,12 +25,11 @@ export default function RegisterForm() {
   const router = useRouter();
 
   useEffect(() => {
-    // Client-side only check
     if (typeof window === 'undefined') return;
 
     const token = storage.getToken();
     if (token) {
-      router.push('/dashboard');
+      router.push(Pages.LOGIN);
       return;
     }
 
@@ -54,7 +53,6 @@ export default function RegisterForm() {
     e.preventDefault();
     setError('');
 
-    // Validation
     if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
       setError('Please fill in all fields');
       return;
@@ -70,8 +68,7 @@ export default function RegisterForm() {
       return;
     }
 
-    // Client-side check for existing user
-    if (typeof window !== 'undefined' && storage.getUserByEmail(formData.email)) {
+    if (storage.getUserByEmail(formData.email)) {
       setError('Account already exists');
       return;
     }
@@ -79,34 +76,24 @@ export default function RegisterForm() {
     setIsLoading(true);
 
     try {
-      const result = await register(formData);
+      const newUser = {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        createdAt: Date.now()
+      };
+
+      storage.setUser(newUser);
+      const demoToken = `demo-token-${crypto.randomUUID()}`;
+      storage.setToken(demoToken);
       
-      if (result?.error) {
-        setError(result.error);
-      } else if (result?.success) {
-        // Client-side operations only
-        if (typeof window !== 'undefined') {
-          // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-          rememberMe 
-            ? storage.setRememberedEmail(formData.email)
-            : storage.clearRememberedEmail();
-          
-          // Demo only - in real app, use token from server
-          storage.setToken(`demo-token-${crypto.randomUUID()}`);
-          
-          // Create user in local storage (demo only)
-          storage.setUser({
-            name: formData.name,
-            email: formData.email,
-            password: formData.password,
-            createdAt:0,
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+      rememberMe 
+        ? storage.setRememberedEmail(formData.email)
+        : storage.clearRememberedEmail();
 
-          });
-        }
-
-        alert('Registration successful!');
-        router.push('/dashboard');
-      }
+      alert('Registration successful!');
+      router.push(Pages.LOGIN);
     } catch (error) {
       console.error('Registration failed:', error);
       setError('An unexpected error occurred');
@@ -114,6 +101,7 @@ export default function RegisterForm() {
       setIsLoading(false);
     }
   };
+
   return (
     <div className="min-h-screen bg-[#17446d] flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-[#23486A] rounded-xl overflow-hidden shadow-[0_0_20px_2px_rgba(239,176,54,0.3)] border-2 border-[#EFB036]/30 hover:shadow-[0_0_25px_5px_rgba(239,176,54,0.4)] hover:border-[#EFB036]/50">
@@ -313,7 +301,7 @@ export default function RegisterForm() {
           <p className="text-[#F5EEDC] text-sm">
             Already have an account?{' '}
             <Link 
-              href="/login" 
+              href="/log in" 
               className="text-[#EFB036] font-medium hover:underline hover:text-[#F5EEDC] transition-colors"
             >
               Login

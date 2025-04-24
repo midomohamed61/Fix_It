@@ -1,3 +1,4 @@
+// components/Card.tsx
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -5,8 +6,26 @@ import Link from '../Link/Link';
 import { Button } from '../Button/Button';
 import CartButton from '../Button/CartButton';
 import ShimmerSkeleton from '@/components/ui/ShimmerSkeleton';
+import { useCart } from '@/context/CartContext';
+
+interface WorkerCardProps {
+  id?: string;
+  name?: string;
+  title?: string;
+  rating?: number;
+  imageUrl?: string;
+  facebook?: string;
+  whatsapp?: string;
+  phone?: string;
+  isLoading?: boolean;
+  price?: number;
+  provider?: string;
+  duration?: string;
+  isLoggedIn?: boolean;
+}
 
 const WorkerCard = ({
+  id = "1",
   name = "Christopher Anderson",
   title = "Professional House Cleaner",
   rating = 4.7,
@@ -14,8 +33,12 @@ const WorkerCard = ({
   facebook = "https://facebook.com",
   whatsapp = "1234567890",
   phone = "+1234567890",
-  isLoading = false
-}) => {
+  isLoading = false,
+  price = 49.99,
+  provider = "CleanPro Services",
+  duration = "2 hours",
+  isLoggedIn = false
+}: WorkerCardProps) => {
   const [isCardHovered, setIsCardHovered] = useState(false);
   const [gradientPosition, setGradientPosition] = useState(0);
   const [isWhatsappHovered, setIsWhatsappHovered] = useState(false);
@@ -24,7 +47,8 @@ const WorkerCard = ({
   const [imageError, setImageError] = useState(false);
   const [isImageLoading, setIsImageLoading] = useState(true);
   
-  // Animate gradient border
+  const { addToCart } = useCart();
+
   useEffect(() => {
     const interval = setInterval(() => {
       setGradientPosition(prev => (prev + 1) % 360);
@@ -32,7 +56,7 @@ const WorkerCard = ({
     return () => clearInterval(interval);
   }, []);
 
-  const renderStars = (rating) => {
+  const renderStars = (rating: number) => {
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 >= 0.5;
     
@@ -56,69 +80,56 @@ const WorkerCard = ({
     );
   };
 
-  // Container style with gradient border effect
-  const containerStyle = {
-    position: 'relative',
-    width: 'fit-content',
-    padding: isCardHovered ? '3px' : '0px',
-    borderRadius: '1.6rem',
-    transition: 'all 0.3s ease',
-    transform: isCardHovered ? 'translateY(-15px) scale(1.03)' : 'translateY(0) scale(1)',
-    zIndex: isCardHovered ? 10 : 1,
+  const handleAddToCart = () => {
+    addToCart({
+      id,
+      name,
+      price,
+      image: imageUrl,
+      provider,
+      duration
+    }, isLoggedIn);
   };
 
-  // Gradient border style
-  const gradientBorderStyle = {
-    position: 'absolute',
-    inset: 0,
-    borderRadius: '1.6rem',
-    padding: '3px',
-    backgroundImage: isCardHovered 
-      ? `linear-gradient(${gradientPosition}deg, 
-         #23486A, #3B6790, #4C7B8B, #EFB036, 
-         #23486A, #3B6790, #4C7B8B, #EFB036)`
-      : 'none',
-    backgroundSize: '400% 400%',
-    backgroundPosition: '0% 50%',
-    animation: isCardHovered ? 'gradient 8s ease infinite' : 'none',
-    WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-    WebkitMaskComposite: 'xor',
-    maskComposite: 'exclude',
-    opacity: isCardHovered ? 1 : 0,
-    transition: 'all 0.3s ease',
-    zIndex: -1
-  };
-
-  // Individual icon animation styles
-  const iconStyle = (isHovered: boolean, bgColor: string) => ({
-    width: '2.5rem',
-    height: '2.5rem',
-    borderRadius: '50%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    transition: 'all 0.3s ease',
-    transform: isHovered ? 'translateY(-8px) scale(1.1)' : 'translateY(0) scale(1)',
-    backgroundColor: bgColor,
-    boxShadow: isHovered 
-      ? `0 10px 15px -3px ${bgColor}40, 0 4px 6px -2px ${bgColor}20`
-      : 'none'
-  });
-
-  // Handle image error
   const handleImageError = () => {
     setImageError(true);
   };
 
   return (
-    <div style={containerStyle} className="w-full max-w-xs mx-auto mt-6"
+    <div style={{
+      position: 'relative',
+      width: 'fit-content',
+      padding: isCardHovered ? '3px' : '0px',
+      borderRadius: '1.6rem',
+      transition: 'all 0.3s ease',
+      transform: isCardHovered ? 'translateY(-15px) scale(1.03)' : 'translateY(0) scale(1)',
+      zIndex: isCardHovered ? 10 : 1,
+    }} className="w-full max-w-xs mx-auto mt-6"
       onMouseEnter={() => setIsCardHovered(true)}
       onMouseLeave={() => setIsCardHovered(false)}
     >
       {/* Gradient Border */}
-      <div style={gradientBorderStyle}></div>
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        borderRadius: '1.6rem',
+        padding: '3px',
+        backgroundImage: isCardHovered 
+          ? `linear-gradient(${gradientPosition}deg, 
+             #23486A, #3B6790, #4C7B8B, #EFB036, 
+             #23486A, #3B6790, #4C7B8B, #EFB036)`
+          : 'none',
+        backgroundSize: '400% 400%',
+        backgroundPosition: '0% 50%',
+        animation: isCardHovered ? 'gradient 8s ease infinite' : 'none',
+        WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+        WebkitMaskComposite: 'xor',
+        maskComposite: 'exclude',
+        opacity: isCardHovered ? 1 : 0,
+        transition: 'all 0.3s ease',
+        zIndex: -1
+      }}></div>
       
-      {/* Global styles for gradient animation */}
       <style jsx global>{`
         @keyframes gradient {
           0% { background-position: 0% 50%; }
@@ -140,7 +151,6 @@ const WorkerCard = ({
         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         transform: isCardHovered ? 'scale(1.02)' : 'scale(1)'
       }}>
-        {/* Shine effect */}
         {isCardHovered && (
           <div style={{
             position: 'absolute',
@@ -155,7 +165,6 @@ const WorkerCard = ({
           }} />
         )}
 
-        {/* Profile Image or Skeleton */}
         <div style={{ 
           position: 'relative', 
           width: '100%', 
@@ -186,7 +195,6 @@ const WorkerCard = ({
           )}
         </div>
 
-        {/* Content */}
         <div style={{ 
           padding: '1rem', 
           display: 'flex', 
@@ -195,7 +203,6 @@ const WorkerCard = ({
           gap: '0.75rem',
           backgroundColor: '#F5EEDC'
         }}>
-          {/* Name */}
           {isLoading ? (
             <ShimmerSkeleton width="60%" height="1.5rem" borderRadius="0.25rem" />
           ) : (
@@ -208,7 +215,6 @@ const WorkerCard = ({
             </h2>
           )}
 
-          {/* Title */}
           {isLoading ? (
             <ShimmerSkeleton width="80%" height="1rem" borderRadius="0.25rem" />
           ) : (
@@ -220,7 +226,6 @@ const WorkerCard = ({
             </p>
           )}
 
-          {/* Rating */}
           {isLoading ? (
             <ShimmerSkeleton width="40%" height="1.5rem" borderRadius="0.25rem" />
           ) : (
@@ -229,7 +234,6 @@ const WorkerCard = ({
             </div>
           )}
 
-          {/* Social Links */}
           {isLoading ? (
             <div className="flex gap-3 mt-2">
               {[1, 2, 3].map((_, index) => (
@@ -243,10 +247,22 @@ const WorkerCard = ({
               gap: '0.75rem', 
               marginTop: '0.5rem' 
             }}>
-              {/* WhatsApp */}
               <Link
                 href={`https://wa.me/${whatsapp}`}
-                style={iconStyle(isWhatsappHovered, '#25D366')}
+                style={{
+                  width: '2.5rem',
+                  height: '2.5rem',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.3s ease',
+                  transform: isWhatsappHovered ? 'translateY(-8px) scale(1.1)' : 'translateY(0) scale(1)',
+                  backgroundColor: '#25D366',
+                  boxShadow: isWhatsappHovered 
+                    ? '0 10px 15px -3px rgba(37, 211, 102, 0.25), 0 4px 6px -2px rgba(37, 211, 102, 0.125)'
+                    : 'none'
+                }}
                 onMouseEnter={() => setIsWhatsappHovered(true)}
                 onMouseLeave={() => setIsWhatsappHovered(false)}
                 aria-label="WhatsApp Contact"
@@ -256,10 +272,22 @@ const WorkerCard = ({
                 </svg>
               </Link>
               
-              {/* Facebook */}
               <Link
                 href={facebook}
-                style={iconStyle(isFacebookHovered, '#1877F2')}
+                style={{
+                  width: '2.5rem',
+                  height: '2.5rem',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.3s ease',
+                  transform: isFacebookHovered ? 'translateY(-8px) scale(1.1)' : 'translateY(0) scale(1)',
+                  backgroundColor: '#1877F2',
+                  boxShadow: isFacebookHovered 
+                    ? '0 10px 15px -3px rgba(24, 119, 242, 0.25), 0 4px 6px -2px rgba(24, 119, 242, 0.125)'
+                    : 'none'
+                }}
                 onMouseEnter={() => setIsFacebookHovered(true)}
                 onMouseLeave={() => setIsFacebookHovered(false)}
                 aria-label="Facebook Profile"
@@ -269,10 +297,22 @@ const WorkerCard = ({
                 </svg>
               </Link>
               
-              {/* Phone */}
               <Link
                 href={`tel:${phone}`}
-                style={iconStyle(isPhoneHovered, '#EFB036')}
+                style={{
+                  width: '2.5rem',
+                  height: '2.5rem',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.3s ease',
+                  transform: isPhoneHovered ? 'translateY(-8px) scale(1.1)' : 'translateY(0) scale(1)',
+                  backgroundColor: '#EFB036',
+                  boxShadow: isPhoneHovered 
+                    ? '0 10px 15px -3px rgba(239, 176, 54, 0.25), 0 4px 6px -2px rgba(239, 176, 54, 0.125)'
+                    : 'none'
+                }}
                 onMouseEnter={() => setIsPhoneHovered(true)}
                 onMouseLeave={() => setIsPhoneHovered(false)}
                 aria-label="Phone Call"
@@ -284,7 +324,6 @@ const WorkerCard = ({
             </div>
           )}
 
-          {/* Buttons */}
           {isLoading ? (
             <div className="flex justify-between w-full p-4 gap-3">
               <ShimmerSkeleton width="67%" height="50px" borderRadius="0.75rem" />
@@ -299,7 +338,7 @@ const WorkerCard = ({
                 About 
               </Button>   
               <CartButton 
-                onClick={() => window.location.href = '/worker-details'}
+                onClick={handleAddToCart}
                 className="hover:shadow-lg shadow-md"
               /> 
             </div>

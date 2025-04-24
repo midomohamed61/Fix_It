@@ -1,4 +1,5 @@
 export interface NavigationItem {
+  path: string;
   icon: React.ReactNode;
   label: string;
   active?: boolean;

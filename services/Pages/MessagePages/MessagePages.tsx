@@ -4,6 +4,32 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Send, Search, Phone, Calendar, User } from 'lucide-react';
 import { Button } from '@/components/ui/Button/Button';
+import { BackButton } from '@/components/ui/Button/BackButton';
+
+// Skeleton Loading Components
+const ContactSkeleton = () => (
+  <div className="p-3 rounded-lg mb-2 bg-[#23486A]/50 animate-pulse">
+    <div className="flex items-start space-x-3">
+      <div className="relative">
+        <div className="w-12 h-12 rounded-full bg-[#4C7B8B]"></div>
+      </div>
+      <div className="flex-1 min-w-0 space-y-2">
+        <div className="h-4 bg-[#4C7B8B] rounded w-3/4"></div>
+        <div className="h-3 bg-[#4C7B8B] rounded w-1/2"></div>
+        <div className="h-3 bg-[#4C7B8B] rounded w-full"></div>
+      </div>
+    </div>
+  </div>
+);
+
+const MessageSkeleton = ({ isUser = false }) => (
+  <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
+    <div className={`max-w-[70%] rounded-lg px-4 py-2 ${isUser ? 'bg-[#EFB036]/50' : 'bg-[#23486A]/50'}`}>
+      <div className="h-4 bg-[#4C7B8B] rounded w-48 mb-2"></div>
+      <div className="h-3 bg-[#4C7B8B] rounded w-16"></div>
+    </div>
+  </div>
+);
 
 export default function MessagesPage() {
   const searchParams = useSearchParams();
@@ -12,7 +38,24 @@ export default function MessagesPage() {
   const [selectedContact, setSelectedContact] = useState<string | null>(initialTechnician);
   const [messageInput, setMessageInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  
+  const [isLoading, setIsLoading] = useState(true);
+  const [showMobileContacts, setShowMobileContacts] = useState(false);
+
+  // Simulate loading delay
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Close mobile contacts when a contact is selected
+  useEffect(() => {
+    if (selectedContact && window.innerWidth < 768) {
+      setShowMobileContacts(false);
+    }
+  }, [selectedContact]);
+
   const contacts = [
     {
       id: 1,
@@ -97,38 +140,66 @@ export default function MessagesPage() {
   
   const handleSendMessage = () => {
     if (messageInput.trim() === '' || !selectedContact) return;
-    // In a real app, this would send the message to the backend
     console.log(`Sending message to ${selectedContact}: ${messageInput}`);
     setMessageInput('');
   };
   
   useEffect(() => {
-    // If there's a technician parameter in the URL, select that contact
     if (initialTechnician) {
       setSelectedContact(initialTechnician);
     }
   }, [initialTechnician]);
-  
+
+  const toggleMobileContacts = () => {
+    setShowMobileContacts(!showMobileContacts);
+  };
+
   return (
-    <div className="p-6 text-[#F5EEDC] h-[calc(100vh-150px)] ">
-      <h1 className="text-4xl font-bold mb-6 text-[#EFB036]">Messages</h1>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-full">
+    <div className="p-4 sm:p-6 text-[#F5EEDC]">
+      <div className="flex items-center gap-4 mb-4 sm:mb-6">
+        <div className="flex items-center gap-2">
+          <BackButton 
+            className="bg-[#23486A] text-[#EFB036] hover:text-[#f6f1e1]"
+            iconSize={30}
+            hoverColor="bg-[#EFB036]"
+            size={30} 
+          />
+          <button 
+            className="md:hidden p-2 rounded-lg bg-[#23486A] text-[#EFB036]"
+            onClick={toggleMobileContacts}
+            aria-label="Toggle contacts"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#EFB036]">Messages</h1>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 h-full">
         {/* Contacts List */}
-        <div className="bg-[#3B6790] rounded-xl p-4 overflow-hidden flex flex-col h-full">
+        <div className={`bg-[#3B6790] rounded-xl p-4 overflow-hidden flex flex-col h-full 
+          ${showMobileContacts ? 'block' : 'hidden'} md:block`}>
           <div className="relative mb-4">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#EFB036]" size={20} />
             <input
               type="text"
               placeholder="Search contacts..."
-              className="w-full bg-[#23486A] border border-[#EFB036] rounded-lg py-2 px-10 text-[#eae1ca] placeholder-[#EFB036]"
+              className="w-full bg-[#23486A] border border-[#EFB036] rounded-lg py-2 px-10 text-[#F5EEDC] placeholder-[#EFB036]"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
           
           <div className="overflow-y-auto flex-1">
-            {filteredContacts.length > 0 ? (
+            {isLoading ? (
+              <>
+                {Array.from({ length: 5 }).map((_, index) => (
+                  <ContactSkeleton key={index} />
+                ))}
+              </>
+            ) : filteredContacts.length > 0 ? (
               filteredContacts.map((contact) => (
                 <div 
                   key={contact.id}
@@ -141,17 +212,21 @@ export default function MessagesPage() {
                 >
                   <div className="flex items-start space-x-3">
                     <div className="relative">
-                      <img src={contact.avatar} alt={contact.name} className="w-12 h-12 rounded-full" />
+                      <img 
+                        src={contact.avatar} 
+                        alt={contact.name} 
+                        className="w-10 h-10 sm:w-12 sm:h-12 rounded-full" 
+                      />
                       {contact.online && (
-                        <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-[#3B6790]"></span>
+                        <span className="absolute bottom-0 right-0 w-2 h-2 sm:w-3 sm:h-3 bg-green-500 rounded-full border-2 border-[#3B6790]"></span>
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-center">
-                        <h3 className="font-medium truncate">{contact.name}</h3>
+                        <h3 className="font-medium truncate text-sm sm:text-base">{contact.name}</h3>
                         <span className="text-xs text-[#4C7B8B]">{contact.timestamp}</span>
                       </div>
-                      <p className="text-sm text-[#EFB036]">{contact.role}</p>
+                      <p className="text-xs sm:text-sm text-[#EFB036]">{contact.role}</p>
                       <p className="text-xs text-[#4C7B8B] truncate mt-1">{contact.lastMessage}</p>
                     </div>
                   </div>
@@ -166,8 +241,44 @@ export default function MessagesPage() {
         </div>
         
         {/* Chat Area */}
-        <div className="bg-[#f6f1e1] rounded-xl p-4 flex flex-col h-full md:col-span-2">
-          {selectedContact ? (
+        <div className={`bg-[#f6f1e1] rounded-xl p-4 flex flex-col h-full 
+          ${showMobileContacts ? 'hidden' : 'block'} md:col-span-2`}>
+          {isLoading ? (
+            <>
+              {/* Chat Header Skeleton */}
+              <div className="flex w-full justify-between items-center p-4 border-b bg-[#23486A] border-[#23486A] animate-pulse">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 rounded-full bg-[#4C7B8B]"></div>
+                  <div className="space-y-2">
+                    <div className="h-4 bg-[#4C7B8B] rounded w-32"></div>
+                    <div className="h-3 bg-[#4C7B8B] rounded w-16"></div>
+                  </div>
+                </div>
+                <div className="flex space-x-2">
+                  <div className="p-2 rounded-full bg-[#4C7B8B] w-10 h-10"></div>
+                  <div className="p-2 rounded-full bg-[#4C7B8B] w-10 h-10"></div>
+                  <div className="p-2 rounded-full bg-[#4C7B8B] w-10 h-10"></div>
+                </div>
+              </div>
+              
+              {/* Messages Skeleton */}
+              <div className="flex-1 overflow-y-auto py-4 space-y-4 px-4">
+                <MessageSkeleton />
+                <MessageSkeleton isUser />
+                <MessageSkeleton />
+                <MessageSkeleton isUser />
+                <MessageSkeleton />
+              </div>
+              
+              {/* Message Input Skeleton */}
+              <div className="p-4 border-t bg-[#23486A] border-[#23486A] animate-pulse">
+                <div className="flex space-x-2">
+                  <div className="flex-1 bg-[#4C7B8B] rounded-lg h-10"></div>
+                  <div className="p-2 rounded-lg bg-[#4C7B8B] w-10 h-10"></div>
+                </div>
+              </div>
+            </>
+          ) : selectedContact ? (
             <>
               {/* Chat Header */}
               <div className="flex w-full justify-between items-center p-4 border-b bg-[#23486A] border-[#23486A]">
@@ -178,34 +289,34 @@ export default function MessagesPage() {
                     className="w-10 h-10 rounded-full"
                   />
                   <div>
-                    <h3 className="font-medium">{selectedContact}</h3>
+                    <h3 className="font-medium text-[#F5EEDC] text-sm sm:text-base">{selectedContact}</h3>
                     <p className="text-xs text-[#EFB036]">
                       {contacts.find(c => c.name === selectedContact)?.online ? 'Online' : 'Offline'}
                     </p>
                   </div>
                 </div>
                 <div className="flex space-x-2">
-                  <Button className="p-2 rounded-full bg-[#23486A] hover:bg-[#1a3655]">
+                  <Button className="p-2 rounded-full bg-[#3B6790] hover:bg-[#23486A] text-[#EFB036]">
                     <Phone size={16} />
                   </Button>
-                  <Button className="p-2 rounded-full bg-[#23486A] hover:bg-[#1a3655]">
+                  <Button className="p-2 rounded-full bg-[#3B6790] hover:bg-[#23486A] text-[#EFB036]">
                     <Calendar size={16} />
                   </Button>
-                  <Button className="p-2 rounded-full bg-[#23486A] hover:bg-[#1a3655]">
+                  <Button className="p-2 rounded-full bg-[#3B6790] hover:bg-[#23486A] text-[#EFB036]">
                     <User size={16} />
                   </Button>
                 </div>
               </div>
               
               {/* Messages */}
-              <div className="flex-1 overflow-y-auto py-4 space-y-4">
+              <div className="flex-1 overflow-y-auto py-4 space-y-4 px-4">
                 {getCurrentMessages().map((msg, idx) => (
                   <div 
                     key={idx} 
                     className={`flex ${msg.sender === 'You' ? 'justify-end' : 'justify-start'}`}
                   >
                     <div 
-                      className={`max-w-[70%] rounded-lg px-4 py-2 ${
+                      className={`max-w-[85%] sm:max-w-[70%] rounded-lg px-3 py-2 text-sm sm:text-base ${
                         msg.sender === 'You' 
                           ? 'bg-[#EFB036] text-[#23486A]' 
                           : 'bg-[#23486A] text-[#F5EEDC]'
@@ -221,12 +332,12 @@ export default function MessagesPage() {
               </div>
               
               {/* Message Input */}
-              <div className="p-4 border-t bg-[#23486A] border-[#23486A] ">
+              <div className="p-4 border-t bg-[#23486A] border-[#23486A]">
                 <div className="flex space-x-2">
                   <input
                     type="text"
                     placeholder="Type a message..."
-                    className="flex-1 bg-[#F5EEDC] border border-[#F5EEDC] hover:border-[#EFB036] rounded-lg py-2 px-4 text-[#F5EEDC] placeholder-[#4C7B8B]"
+                    className="flex-1 bg-[#F5EEDC] border border-[#F5EEDC] hover:border-[#EFB036] rounded-lg py-2 px-4 text-[#23486A] placeholder-[#4C7B8B] text-sm sm:text-base"
                     value={messageInput}
                     onChange={(e) => setMessageInput(e.target.value)}
                     onKeyDown={(e) => {
@@ -244,11 +355,17 @@ export default function MessagesPage() {
             </>
           ) : (
             <div className="flex items-center justify-center h-full">
-              <div className="text-center">
+              <div className="text-center text-[#23486A]">
                 <p className="text-lg mb-4">Select a contact to start messaging</p>
                 <p className="text-sm text-[#4C7B8B]">
                   You can communicate with your service providers here
                 </p>
+                <button 
+                  className="md:hidden mt-4 px-4 py-2 bg-[#23486A] text-[#EFB036] rounded-lg"
+                  onClick={toggleMobileContacts}
+                >
+                  View Contacts
+                </button>
               </div>
             </div>
           )}
@@ -256,4 +373,4 @@ export default function MessagesPage() {
       </div>
     </div>
   );
-} 
+}

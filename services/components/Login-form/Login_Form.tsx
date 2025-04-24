@@ -7,7 +7,7 @@ import { Input } from '../../components/ui/Form/Input';
 import { Button } from '../../components/ui/Button/Button';
 import { cn } from '../../lib/utils/formatting';
 import { login } from '../../app/(auth)/login/actions';
-import { Pages } from '@/lib/config/constants';
+import { Pages} from '@/lib/config/constants';
 import { FaEye, FaEyeSlash, FaApple, FaGoogle, FaFacebook } from 'react-icons/fa';
 import { HiOutlineMail, HiOutlineLockClosed } from 'react-icons/hi';
 import { storage } from '../../lib/utils/storage';
@@ -28,7 +28,7 @@ export default function LoginForm() {
     const token = storage.getToken();
     if (token) {
       alert('You are already logged in! Redirecting to dashboard...');
-      router.push('/dashboard');
+      router.push('/client');
       return;
     }
 
@@ -65,17 +65,14 @@ export default function LoginForm() {
         alert(`Login failed: ${result.error}`);
       } else if (result?.success) {
         // Handle remember me preference
-        rememberMe 
-          ? storage.setRememberedEmail(formData.email)
-          : storage.clearRememberedEmail();
-        
+        rememberMe ? storage.setRememberedEmail(formData.email): storage.clearRememberedEmail();
         // Set auth token
         if (result.token) {
           storage.setToken(result.token);
         }
         
         alert('Login successful! Redirecting to dashboard...');
-        router.push('/dashboard');
+        router.push("client");
       }
     } catch (error) {
       console.error('Login failed:', error);

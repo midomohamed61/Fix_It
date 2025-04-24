@@ -18,6 +18,7 @@ export enum Languages {
     Register = "register",
     FORGOT_PASSWORD = "forgot-password",
     CONTACT = "contact",
+    Cart = "cart",
     CATEGORIES = "categories",
     MENU_ITEMS = "menu-items",
     USERS = "users",
