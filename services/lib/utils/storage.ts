@@ -1,4 +1,3 @@
-// lib/utils/storage.ts
 import { User } from '@/lib/api/auth';
 
 const TOKEN_KEY = 'auth_token';

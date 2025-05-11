@@ -85,15 +85,16 @@ const ClientDashboardPage = () => {
   }, []);
   
   const navigationItems = useMemo<NavigationItem[]>(() => [
-    { icon: <FaHome size={20} />, label: 'Dashboard', active: activeTab === 'dashboard', route: 'dashboard' },
-    { icon: <FaTools size={20} />, label: 'My Services', active: activeTab === 'services', route: 'services' },
-    { icon: <FaCalendarAlt size={20} />, label: 'Appointments', active: activeTab === 'appointments', route: 'appointments' },
-    { icon: <FaComments size={20} />, label: 'Messages', active: activeTab === 'messages', route: 'messages' },
-    { icon: <FaFileAlt size={20} />, label: 'Service Requests', active: activeTab === 'requests', route: 'requests' },
-    { icon: <FaClock size={20} />, label: 'Service History', active: activeTab === 'history', route: 'history' },
-    { icon: <FaUserCheck size={20} />, label: 'My Technicians', active: activeTab === 'technicians', route: 'technicians' },
-    { icon: <FaPhone size={20} />, label: 'Support', active: activeTab === 'support', route: 'support' },
-  ], [activeTab]);
+  { icon: <FaHome size={20} />, label: 'Dashboard', active: activeTab === 'dashboard', route: 'dashboard', path: '/client/dashboard' },
+  { icon: <FaTools size={20} />, label: 'My Services', active: activeTab === 'services', route: 'services', path: '/client/services' },
+  { icon: <FaCalendarAlt size={20} />, label: 'Appointments', active: activeTab === 'appointments', route: 'appointments', path: '/client/appointments' },
+  { icon: <FaComments size={20} />, label: 'Messages', active: activeTab === 'messages', route: 'messages', path: '/client/messages' },
+  { icon: <FaFileAlt size={20} />, label: 'Service Requests', active: activeTab === 'requests', route: 'requests', path: '/client/requests' },
+  { icon: <FaClock size={20} />, label: 'Service History', active: activeTab === 'history', route: 'history', path: '/client/history' },
+  { icon: <FaUserCheck size={20} />, label: 'My Technicians', active: activeTab === 'technicians', route: 'technicians', path: '/client/technicians' },
+  { icon: <FaPhone size={20} />, label: 'Support', active: activeTab === 'support', route: 'support', path: '/client/support' },
+], [activeTab]);
+
 
   const serviceProviders: Specialty[] = [
     {

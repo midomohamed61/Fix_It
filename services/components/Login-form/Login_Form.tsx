@@ -6,7 +6,6 @@ import { Label } from '../../components/ui/Form/Label';
 import { Input } from '../../components/ui/Form/Input';
 import { Button } from '../../components/ui/Button/Button';
 import { cn } from '../../lib/utils/formatting';
-import { login } from '../../app/(auth)/login/actions';
 import { Pages} from '@/lib/config/constants';
 import { FaEye, FaEyeSlash, FaApple, FaGoogle, FaFacebook } from 'react-icons/fa';
 import { HiOutlineMail, HiOutlineLockClosed } from 'react-icons/hi';
@@ -26,8 +25,10 @@ export default function LoginForm() {
   // Auto-login check and load remembered email
   useEffect(() => {
     const token = storage.getToken();
-    if (token) {
-      alert('You are already logged in! Redirecting to dashboard...');
+    const currentUser = storage.getCurrentUser();
+    
+    if (token && currentUser) {
+      console.log('User is already logged in, redirecting to dashboard...');
       router.push('/client');
       return;
     }
@@ -58,22 +59,38 @@ export default function LoginForm() {
     setIsLoading(true);
 
     try {
-      const result = await login(formData);
+      // For demo/development purposes, let's check if user exists in localStorage
+      const user = storage.getUserByEmail(formData.email);
       
-      if (result?.error) {
-        setError(result.error);
-        alert(`Login failed: ${result.error}`);
-      } else if (result?.success) {
-        // Handle remember me preference
-        rememberMe ? storage.setRememberedEmail(formData.email): storage.clearRememberedEmail();
-        // Set auth token
-        if (result.token) {
-          storage.setToken(result.token);
-        }
-        
-        alert('Login successful! Redirecting to dashboard...');
-        router.push("client");
+      if (!user) {
+        setError('User not found');
+        alert('User not found. Please check your email or register.');
+        setIsLoading(false);
+        return;
       }
+      
+      if (user.password !== formData.password) {
+        setError('Invalid password');
+        alert('Invalid password. Please try again.');
+        setIsLoading(false);
+        return;
+      }
+      
+      // Handle remember me preference
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+      rememberMe ? storage.setRememberedEmail(formData.email) : storage.clearRememberedEmail();
+      
+      // Set user data in storage
+      storage.setCurrentUser(user);
+      
+      // Create a token if one doesn't exist
+      if (!storage.getToken()) {
+        const demoToken = `demo-token-${crypto.randomUUID()}`;
+        storage.setToken(demoToken);
+      }
+      
+      alert('Login successful! Redirecting to dashboard...');
+      router.push("/client");
     } catch (error) {
       console.error('Login failed:', error);
       setError('An unexpected error occurred');

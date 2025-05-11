@@ -29,7 +29,7 @@ interface ImageSliderProps {
 const ImageSlider = ({
   slides,
   autoPlay = true,
-  autoPlayInterval = 5000,
+  autoPlayInterval = 3000,
   showDots = true,
   showArrows = true,
   className,

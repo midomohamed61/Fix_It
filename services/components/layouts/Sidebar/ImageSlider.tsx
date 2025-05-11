@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils/formatting';
 import SliderSkeleton from './SliderSkeleton';
 import SlideItem from './SlideItem';
+import { Button } from '@/components/ui/Button/Button';
 
 export interface SlideData {
   id: number;
@@ -28,7 +29,7 @@ interface ImageSliderProps {
 const ImageSlider = React.memo(({
   slides,
   autoPlay = true,
-  autoPlayInterval = 5000,
+  autoPlayInterval = 3000,
   showDots = true,
   showArrows = true,
   className,
@@ -122,20 +123,20 @@ const ImageSlider = React.memo(({
 
       {showArrows && slides.length > 1 && (
         <>
-          <button 
+          <Button 
             onClick={goToPrev}
             className="absolute top-1/2 left-4 -translate-y-1/2 p-2 rounded-full bg-black/30 text-white hover:bg-black/50 transition-colors"
             aria-label="Previous slide"
           >
             <ChevronLeft className="w-6 h-6" />
-          </button>
-          <button 
+          </Button>
+          <Button 
             onClick={goToNext}
             className="absolute top-1/2 right-4 -translate-y-1/2 p-2 rounded-full bg-black/30 text-white hover:bg-black/50 transition-colors"
             aria-label="Next slide"
           >
             <ChevronRight className="w-6 h-6" />
-          </button>
+          </Button>
         </>
       )}
 

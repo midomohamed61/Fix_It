@@ -8,6 +8,7 @@ import SearchBar from "../../ui/SearchBar/SearchBar";
 import { Button } from "@/components/ui/Button/Button";
 import MobileMenu from "./MobileMenu";
 import { useCart } from '@/context/CartContext';
+import { storage } from '@/lib/utils/storage';
 
 interface NotificationProps {
   message: string;
@@ -26,16 +27,78 @@ interface LinkItem {
   onClick?: (e: React.MouseEvent) => void;
 }
 
+interface UserInfo {
+  username: string;
+  profileImage: string;
+}
+
 export default function Header() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [username, setUsername] = useState("John Doe");
-  const [profileImage, setProfileImage] = useState("/profile-icon.png");
+  const [userInfo, setUserInfo] = useState<UserInfo>({
+    username: "",
+    profileImage: "/profile-icon.png"
+  });
   const [openMenu, setOpenMenu] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [scrollOpacity, setScrollOpacity] = useState(1);
   const [notification, setNotification] = useState<{message: string, show: boolean}>({message: '', show: false});
 
   const { cartItems, requireLogin } = useCart();
+
+  // Check authentication status on component mount
+  useEffect(() => {
+    const checkAuth = () => {
+      const isAuthenticated = storage.isAuthenticated();
+      if (isAuthenticated) {
+        const currentUser = storage.getCurrentUser();
+        if (currentUser) {
+          setIsLoggedIn(true);
+          setUserInfo({
+            username: currentUser.name || 'User',
+            profileImage: currentUser.profileImage || "/profile-icon.png"
+          });
+        }
+      } else {
+        setIsLoggedIn(false);
+      }
+    };
+
+    checkAuth();
+    
+    // Setup listener for storage changes (for cross-tab login/logout)
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'auth_token' || event.key === 'current_user') {
+        checkAuth();
+      }
+    });
+    
+    return () => {
+      window.removeEventListener('storage', () => {});
+    };
+  }, []);
+
+  // Handle logout function
+  const handleLogout = () => {
+    storage.logout();
+    setIsLoggedIn(false);
+    setUserInfo({
+      username: "",
+      profileImage: "/profile-icon.png"
+    });
+    
+    setNotification({
+      message: 'Successfully logged out!',
+      show: true
+    });
+    
+    // Hide notification after 3 seconds
+    setTimeout(() => {
+      setNotification({
+        message: '',
+        show: false
+      });
+    }, 3000);
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -67,6 +130,7 @@ export default function Header() {
     }
   };
 
+  // Generate links dynamically (cart link depends on login status)
   const links: LinkItem[] = [
     { 
       id: crypto.randomUUID(), 
@@ -168,14 +232,14 @@ export default function Header() {
           {isLoggedIn && (
             <div className="flex items-center space-x-2">
               <img
-                src={profileImage}
+                src={userInfo.profileImage}
                 alt="Profile"
                 className="w-8 h-8 rounded-full"
               />
-              <span className="text-[#F5EEDC]">{username}</span>
+              <span className="text-[#F5EEDC]">{userInfo.username}</span>
               <Button
                 className="bg-[#EFB036] hover:bg-[#EFB036]/90 text-[#F5EEDC] hover:text-[#23486A] font-bold ml-4 transition-colors duration-200"
-                onClick={() => setIsLoggedIn(false)}
+                onClick={handleLogout}
               >
                 Logout
               </Button>
@@ -216,7 +280,8 @@ export default function Header() {
           onClose={() => setOpenMenu(false)} 
           links={links} 
           isLoggedIn={isLoggedIn} 
-          setIsLoggedIn={setIsLoggedIn} 
+          userInfo={userInfo}
+          handleLogout={handleLogout}
         />
       </div>
     </header>

@@ -10,13 +10,16 @@ import { FaApple, FaEye, FaEyeSlash, FaFacebook, FaGoogle } from 'react-icons/fa
 import { HiOutlineMail, HiOutlineLockClosed, HiOutlineUser } from 'react-icons/hi';
 import { storage } from '@/lib/utils/storage';
 import { Pages } from '@/lib/config/constants';
+import { RadioGroup, RadioGroupItem } from "@/components/ui/RadioGroup/RadioGroup";
+import PasswordValidation from '@/components/PasswordValidation/PasswordValidation';
 
 export default function RegisterForm() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    role: 'client' // Default role
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -53,7 +56,7 @@ export default function RegisterForm() {
     e.preventDefault();
     setError('');
 
-    if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
+    if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword || !formData.role) {
       setError('Please fill in all fields');
       return;
     }
@@ -80,10 +83,14 @@ export default function RegisterForm() {
         name: formData.name,
         email: formData.email,
         password: formData.password,
+        role: formData.role, // Save the role
         createdAt: Date.now()
       };
 
-      storage.setUser(newUser);
+      storage.setUser({
+        ...newUser,
+        profileImage: '/images/default-profile.jpg'
+      });
       const demoToken = `demo-token-${crypto.randomUUID()}`;
       storage.setToken(demoToken);
       
@@ -93,7 +100,13 @@ export default function RegisterForm() {
         : storage.clearRememberedEmail();
 
       alert('Registration successful!');
-      router.push(Pages.LOGIN);
+      
+      // Route based on role
+      if (formData.role === 'client') {
+        router.push('/clientinfo');
+      } else {
+        router.push('');
+      }
     } catch (error) {
       console.error('Registration failed:', error);
       setError('An unexpected error occurred');
@@ -135,7 +148,7 @@ export default function RegisterForm() {
                 <Input
                   id="name"
                   type="text"
-                  placeholder="John Doe"
+                  placeholder="Enter Your Name"
                   required
                   className="w-full pl-10 bg-[#F5EEDC] text-[#23486A] border border-[#4C7B8B] focus:ring-2 focus:ring-[#EFB036] focus:border-transparent"
                   value={formData.name}
@@ -155,7 +168,7 @@ export default function RegisterForm() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="you@example.com"
+                  placeholder="Enter Your Email Address"
                   required
                   className="w-full pl-10 bg-[#F5EEDC] text-[#23486A] border border-[#4C7B8B] focus:ring-2 focus:ring-[#EFB036] focus:border-transparent"
                   value={formData.email}
@@ -164,54 +177,16 @@ export default function RegisterForm() {
               </div>
             </div>
             
-            <div>
-              <Label htmlFor="password" className="block text-[#F5EEDC] mb-2">
-                Password
-              </Label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#4C7B8B]">
-                  <HiOutlineLockClosed className="h-5 w-5" />
-                </div>
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  required
-                  className="w-full pl-10 bg-[#F5EEDC] text-[#23486A] border border-[#4C7B8B] focus:outline-none focus:ring-2 focus:ring-[#EFB036] focus:border-transparent"
-                  value={formData.password}
-                  onChange={handleChange}
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#4C7B8B] hover:text-[#EFB036]"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? <FaEyeSlash className="h-5 w-5" /> : <FaEye className="h-5 w-5" />}
-                </button>
-              </div>
-              <p className="mt-1 text-xs text-[#F5EEDC]">
-                Must be 8+ chars with uppercase and number
-              </p>
-            </div>
+            <PasswordValidation 
+              password={formData.password}
+              confirmPassword={formData.confirmPassword}
+              onChange={handleChange}
+              errors={error ? { 
+                password: error.includes('Password') ? error : '',
+                confirmPassword: error.includes('match') ? error : '' 
+              } : {}}
+            />
             
-            <div>
-              <Label htmlFor="confirmPassword" className="block text-[#F5EEDC] mb-2">
-                Confirm Password
-              </Label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#4C7B8B]">
-                  <HiOutlineLockClosed className="h-5 w-5" />
-                </div>
-                <Input
-                  id="confirmPassword"
-                  type={showPassword ? "text" : "password"}
-                  required
-                  className="w-full pl-10 bg-[#F5EEDC] text-[#23486A] border border-[#4C7B8B] focus:outline-none focus:ring-2 focus:ring-[#EFB036] focus:border-transparent"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                />
-              </div>
-            </div>
-
             <div className="flex items-center">
               <input
                 id="remember-me"
@@ -224,7 +199,28 @@ export default function RegisterForm() {
                 Remember me
               </label>
             </div>
-            
+
+            <div className="space-y-2">
+              <Label className="block text-[#F5EEDC] mb-2">
+                I am registering as a:
+              </Label>
+              <RadioGroup 
+                defaultValue="client" 
+                className="flex space-x-4"
+                onValueChange={(value) => setFormData(prev => ({ ...prev, role: value }))}
+                value={formData.role}
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="client" id="client" className="text-[#EFB036]" />
+                  <Label htmlFor="client" className="text-[#F5EEDC]">Client</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="worker" id="worker" className="text-[#EFB036]" />
+                  <Label htmlFor="worker" className="text-[#F5EEDC]">Service Provider</Label>
+                </div>
+              </RadioGroup>
+            </div>
+
             <Button
               type="submit"
               disabled={isLoading}

@@ -58,7 +58,7 @@ const ProviderCard = memo(({ provider }: { provider: Specialty }) => (
           icon={FaUser}
         />
         <IconButton
-          href={Pages.MESSAGE}
+          href={`client/${Pages.MESSAGE}`}
           className="bg-[#EFB036] hover:bg-[#F8C14D] text-[#23486A]"
           icon={FaPhone}
         />

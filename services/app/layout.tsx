@@ -2,10 +2,11 @@
 
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import {Roboto} from "next/font/google";
+import { Roboto } from "next/font/google";
 import Header from "@/components/layouts/Header/Header";
 import Footer from "@/components/layouts/Footer/Footer";
 import { usePathname } from "next/navigation";
+import { LanguageProvider } from "@/components/ui/LanguageToggle/LanguageContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,14 +20,17 @@ const geistMono = Geist_Mono({
 
 const roboto = Roboto({
   subsets: ['latin'],
-  weight:['400','500','700'],
+  weight: ['400', '500', '700'],
   preload: true,
-})
+});
 
-export default function RootLayout({children,}: Readonly<{children: React.ReactNode;}>) {
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   const pathname = usePathname();
   
-  // List of paths where we don't want to show Header and Footer
   const noHeaderFooterPaths = [
     "/login",
     "/register",
@@ -41,10 +45,12 @@ export default function RootLayout({children,}: Readonly<{children: React.ReactN
 
   return (
     <html lang="en">
-      <body className={roboto.className +`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        {shouldShowHeaderFooter && <Header/>}
-        {children}
-        {shouldShowHeaderFooter && <Footer/>}
+      <body className={`${roboto.className} ${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <LanguageProvider>
+          {shouldShowHeaderFooter && <Header />}
+          {children}
+          {shouldShowHeaderFooter && <Footer />}
+        </LanguageProvider>
       </body>
     </html>
   );

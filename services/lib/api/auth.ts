@@ -4,6 +4,7 @@ import { storage } from '@/lib/utils/storage';
 const API_URL = 'https://6802ab350a99cb7408ea3413.mockapi.io';
 
 export interface User {
+  profileImage: string;
   id?: string;
   name: string;
   email: string;
