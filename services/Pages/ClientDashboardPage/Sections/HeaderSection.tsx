@@ -1,9 +1,9 @@
 "use client";
 
 import React from 'react';
-import { Bell, Settings, Home } from 'lucide-react';
-import { CustomImage } from '@/components/ui/Images/Image';
-import Link from '@/components/ui/Link/Link';
+import { motion } from 'framer-motion';
+import { Settings, Home, Bell } from 'lucide-react';
+import Link from 'next/link';
 
 interface HeaderSectionProps {
   title: string;
@@ -11,78 +11,73 @@ interface HeaderSectionProps {
   profileImage?: string;
 }
 
-const DEFAULT_PROFILE_IMAGE = '/images/default-profile.jpg';
-
-const ProfileSection = React.memo(({ 
-  title, 
-  subtitle, 
-  profileImage 
-}: HeaderSectionProps) => (
-  <div className="flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-8">
-    <div className="relative group">
-      <div className="absolute -inset-1 bg-gradient-to-r from-[#EFB036] via-[#d9a032] to-[#EFB036] rounded-full opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-gradient-xy"></div>
-      <div className="relative">
-        <CustomImage
-          src={profileImage || DEFAULT_PROFILE_IMAGE}
-          alt={`${title}'s profile`}
-          width={160}
-          height={160}
-          className="w-32 h-32 md:w-40 md:h-40 rounded-full ring-4 ring-[#EFB036] ring-offset-4 ring-offset-[#23486A] transform transition duration-300 group-hover:scale-105"
-          fallbackSrc={DEFAULT_PROFILE_IMAGE}
-        />
-        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-[#EFB036] to-[#d9a032] opacity-0 group-hover:opacity-20 transition duration-300"></div>
-      </div>
-    </div>
-    <div className="text-center md:text-left">
-      <h1 className="text-2xl md:text-4xl font-bold mb-2">{title}</h1>
-      <p className="text-lg md:text-xl text-[#4C7B8B] mb-4">{subtitle}</p>
-      <div className="flex items-center justify-center md:justify-start">
-        <span className="text-xl md:text-2xl font-bold text-[#EFB036]">4.8</span>
-        <span className="text-lg md:text-xl text-[#4C7B8B] ml-3">★ (12 reviews)</span>
-      </div>
-    </div>
-  </div>
-));
-
-ProfileSection.displayName = 'ProfileSection';
-
-const StatsSection = React.memo(() => (
-  <div className="text-center md:text-right">
-    <p className="text-lg md:text-xl text-[#F5EEDC] mb-1">Total spent</p>
-    <p className="text-2xl md:text-3xl font-bold">$1,285</p>
-  </div>
-));
-
-StatsSection.displayName = 'StatsSection';
-
-const NavigationIcons = React.memo(() => (
-  <div className="flex space-x-6">
-    <Link href={"/"} className="p-3 bg-[#EFB036] hover:bg-[#d9a032] transform hover:scale-110 transition-all duration-300 ease-in-out rounded-xl text-[#F5EEDC] shadow-lg hover:shadow-xl">
-      <Home size={30} className="transform hover:rotate-6" />
-    </Link>
-    <Link href={"/"} className="p-3 bg-[#EFB036] hover:bg-[#d9a032] transform hover:scale-110 transition-all duration-300 ease-in-out rounded-xl text-[#F5EEDC] shadow-lg hover:shadow-xl">
-      <Bell size={30} className="transform hover:rotate-6" />
-    </Link>
-    <Link href={"/"} className="p-3 bg-[#EFB036] hover:bg-[#d9a032] transform hover:scale-110 transition-all duration-300 ease-in-out rounded-xl text-[#F5EEDC] shadow-lg hover:shadow-xl">
-      <Settings size={30} className="transform hover:rotate-6 hover:animate-spin" />
-    </Link>
-  </div>
-));
-
-NavigationIcons.displayName = 'NavigationIcons';
-
-export const HeaderSection = React.memo(({ 
-  title, 
+export const HeaderSection: React.FC<HeaderSectionProps> = ({
+  title,
   subtitle,
-  profileImage 
-}: HeaderSectionProps) => (
-  <div className="flex flex-col md:flex-row justify-between items-center gap-8 md:gap-12 mb-12 p-6 md:p-8 bg-[#23486A]/50 rounded-2xl backdrop-blur-sm">
-    <ProfileSection title={title} subtitle={subtitle} profileImage={profileImage} />
-    <div className="flex flex-col md:flex-row items-center space-y-6 md:space-y-0 md:space-x-8">
-      <StatsSection />
-      <NavigationIcons />
+  profileImage
+}) => {
+  return (
+    <div className="bg-[#3B6790] rounded-xl p-6 mb-6">
+      <div className="flex justify-between items-center">
+        <div className="flex items-center space-x-4">
+          {profileImage ? (
+            <motion.img
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 200, damping: 20 }}
+              src={profileImage}
+              alt="Profile"
+              className="w-24 h-24 rounded-full object-cover border-4 border-[#EFB036]"
+            />
+          ) : (
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 200, damping: 20 }}
+              className="w-24 h-24 rounded-full bg-[#23486A] flex items-center justify-center"
+            >
+              <span className="text-4xl text-[#EFB036]">
+                {title.charAt(0).toUpperCase()}
+              </span>
+            </motion.div>
+          )}
+          <div>
+            <motion.h1
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="text-3xl font-bold text-[#EFB036]"
+            >
+              {title}
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.1 }}
+              className="text-[#F5EEDC] mt-1"
+            >
+              {subtitle}
+            </motion.p>
+          </div>
+        </div>
+        <div className="flex items-center space-x-4">
+          <Link href="/" className="p-3 bg-[#EFB036] hover:bg-[#d9a032] transform hover:scale-110 transition-all duration-300 ease-in-out rounded-xl text-[#F5EEDC] shadow-lg hover:shadow-xl">
+            <Home size={30} className="transform hover:rotate-6 hover:animate-bounce" />
+          </Link>
+          <Link href="/client/notifications" className="p-3 bg-[#EFB036] hover:bg-[#d9a032] transform hover:scale-110 transition-all duration-300 ease-in-out rounded-xl text-[#F5EEDC] shadow-lg hover:shadow-xl relative">
+            <Bell size={30} className="transform hover:rotate-6 hover:animate-pulse" />
+            <motion.span
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-xs text-white"
+            >
+              3
+            </motion.span>
+          </Link>
+          <Link href="/client/settings" className="p-3 bg-[#EFB036] hover:bg-[#d9a032] transform hover:scale-110 transition-all duration-300 ease-in-out rounded-xl text-[#F5EEDC] shadow-lg hover:shadow-xl">
+            <Settings size={30} className="transform hover:rotate-6 hover:animate-spin" />
+          </Link>
+        </div>
+      </div>
     </div>
-  </div>
-));
-
-HeaderSection.displayName = 'HeaderSection'; 
+  );
+}; 

@@ -105,7 +105,7 @@ export default function RegisterForm() {
       if (formData.role === 'client') {
         router.push('/clientinfo');
       } else {
-        router.push('');
+        router.push('/workerinfo');
       }
     } catch (error) {
       console.error('Registration failed:', error);

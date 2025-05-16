@@ -49,32 +49,42 @@ type ImagePreviews = {
 
 export default function ClientInformationPortal() {
   const [currentSection, setCurrentSection] = useState(0);
-  const [formData, setFormData] = useState<FormData>({
-    firstName: '',
-    lastName: '',
-    dob: '',
-    gender: '',
-    nationality: '',
-    occupation: '',
-    email: '',
-    phone: '',
-    address: '',
-    city: '',
-    state: '',
-    zipCode: '',
-    country: '',
-    alternateContact: '',
-    idType: '',
-    idNumber: '',
-    issueDate: '',
-    expiryDate: '',
-    issuingAuthority: '',
-    issuingCountry: '',
-    profilePhoto: null,
-    idFront: null,
-    idBack: null,
-    additionalDocs: null,
-    confirmation: false,
+  const [formData, setFormData] = useState<FormData>(() => {
+    // Initialize with default values
+    const defaultData = {
+      firstName: '',
+      lastName: '',
+      dob: '',
+      gender: '',
+      nationality: '',
+      occupation: '',
+      email: '',
+      phone: '',
+      address: '',
+      city: '',
+      state: '',
+      zipCode: '',
+      country: '',
+      alternateContact: '',
+      idType: '',
+      idNumber: '',
+      issueDate: '',
+      expiryDate: '',
+      issuingAuthority: '',
+      issuingCountry: '',
+      profilePhoto: null,
+      idFront: null,
+      idBack: null,
+      additionalDocs: null,
+      confirmation: false,
+    };
+
+    // Only access localStorage on the client side
+    if (typeof window !== 'undefined') {
+      const savedData = localStorage.getItem('clientFormData');
+      return savedData ? JSON.parse(savedData) : defaultData;
+    }
+    return defaultData;
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submissionComplete, setSubmissionComplete] = useState(false);
@@ -101,7 +111,31 @@ export default function ClientInformationPortal() {
     additionalDocs: useRef<HTMLInputElement>(null),
   };
 
-  const handleFileChange = (field: string, e: React.ChangeEvent<HTMLInputElement> | { target: { files: FileList } }) => {
+  // Save form data to localStorage whenever it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('clientFormData', JSON.stringify(formData));
+    }
+  }, [formData]);
+
+  // Save current section to localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('clientCurrentSection', currentSection.toString());
+    }
+  }, [currentSection]);
+
+  // Load current section from localStorage on initial render
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedSection = localStorage.getItem('clientCurrentSection');
+      if (savedSection) {
+        setCurrentSection(parseInt(savedSection));
+      }
+    }
+  }, []);
+
+  const handleFileChange = async (field: string, e: React.ChangeEvent<HTMLInputElement> | { target: { files: FileList } }) => {
     const files = 'files' in e.target ? e.target.files : e.target.files;
     if (!files || files.length === 0) return;
 
@@ -109,17 +143,42 @@ export default function ClientInformationPortal() {
     const newImagePreviews = { ...imagePreviews };
 
     if (field === 'additionalDocs') {
-      newFormData[field] = Array.from(files);
-      newImagePreviews[field] = Array.from(files).map(file => ({
-        file,
-        preview: URL.createObjectURL(file),
-      }));
+        const fileArray = Array.from(files);
+        newFormData[field] = fileArray;
+        
+        // Convert files to base64
+        const base64Promises = fileArray.map(file => {
+            return new Promise<string>((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    resolve(reader.result as string);
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+
+        const base64Array = await Promise.all(base64Promises);
+        newImagePreviews[field] = fileArray.map((file, index) => ({
+            file,
+            preview: base64Array[index]
+        }));
     } else {
-      newFormData[field as keyof FormData] = files[0] as File;
-      newImagePreviews[field as keyof ImagePreviews] = {
-        file: files[0],
-        preview: URL.createObjectURL(files[0]),
-      };
+        const file = files[0];
+        newFormData[field as keyof FormData] = file;
+
+        // Convert file to base64
+        const base64 = await new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                resolve(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        });
+
+        newImagePreviews[field as keyof ImagePreviews] = {
+            file,
+            preview: base64
+        };
     }
 
     setFormData(newFormData);
@@ -150,104 +209,122 @@ export default function ClientInformationPortal() {
     });
   };
 
-  const validateSection = (sectionIndex: number) => {
+  const validateSection = () => {
     const newErrors: Record<string, string> = {};
-    let isValid = true;
 
-    if (sectionIndex === 0) {
-      if (!formData.firstName.trim()) {
-        newErrors.firstName = 'Please enter your first name';
-        isValid = false;
-      }
-      if (!formData.lastName.trim()) {
-        newErrors.lastName = 'Please enter your last name';
-        isValid = false;
-      }
-      if (!formData.dob) {
-        newErrors.dob = 'Please enter your date of birth';
-        isValid = false;
-      }
-    } else if (sectionIndex === 1) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!formData.email.trim()) {
-        newErrors.email = 'Please enter your email address';
-        isValid = false;
-      } else if (!emailRegex.test(formData.email)) {
-        newErrors.email = 'Please enter a valid email address';
-        isValid = false;
-      }
+    switch (currentSection) {
+      case 0: // Personal Information
+        if (!formData.firstName) newErrors.firstName = 'First name is required';
+        else if (formData.firstName.length < 2) newErrors.firstName = 'First name must be at least 2 characters';
+        else if (!/^[a-zA-Z\s]*$/.test(formData.firstName)) newErrors.firstName = 'First name should only contain letters';
 
-      const phoneRegex = /^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/;
-      if (!formData.phone.trim()) {
-        newErrors.phone = 'Please enter your phone number';
-        isValid = false;
-      } else if (!phoneRegex.test(formData.phone)) {
-        newErrors.phone = 'Please enter a valid phone number';
-        isValid = false;
-      }
+        if (!formData.lastName) newErrors.lastName = 'Last name is required';
+        else if (formData.lastName.length < 2) newErrors.lastName = 'Last name must be at least 2 characters';
+        else if (!/^[a-zA-Z\s]*$/.test(formData.lastName)) newErrors.lastName = 'Last name should only contain letters';
 
-      if (!formData.address.trim()) {
-        newErrors.address = 'Please enter your address';
-        isValid = false;
-      }
-      if (!formData.city.trim()) {
-        newErrors.city = 'Please enter your city';
-        isValid = false;
-      }
-      if (!formData.zipCode.trim()) {
-        newErrors.zipCode = 'Please enter your postal/zip code';
-        isValid = false;
-      }
-      if (!formData.country.trim()) {
-        newErrors.country = 'Please enter your country';
-        isValid = false;
-      }
-    } else if (sectionIndex === 2) {
-      if (!formData.idType) {
-        newErrors.idType = 'Please select an ID type';
-        isValid = false;
-      }
-      if (!formData.idNumber.trim()) {
-        newErrors.idNumber = 'Please enter your ID number';
-        isValid = false;
-      }
-      if (!formData.expiryDate) {
-        newErrors.expiryDate = 'Please enter an expiry date';
-        isValid = false;
-      } else if (new Date(formData.expiryDate) <= new Date()) {
-        newErrors.expiryDate = 'Expiry date must be in the future';
-        isValid = false;
-      }
-      if (!formData.issuingAuthority.trim()) {
-        newErrors.issuingAuthority = 'Please enter the issuing authority';
-        isValid = false;
-      }
-      if (!formData.issuingCountry.trim()) {
-        newErrors.issuingCountry = 'Please enter the issuing country';
-        isValid = false;
-      }
-    } else if (sectionIndex === 3) {
-      if (!formData.profilePhoto) {
-        newErrors.profilePhoto = 'Please upload a profile photo';
-        isValid = false;
-      }
-      if (!formData.idFront) {
-        newErrors.idFront = 'Please upload the front of your ID';
-        isValid = false;
-      }
-    } else if (sectionIndex === 4) {
-      if (!formData.confirmation) {
-        newErrors.confirmation = 'Please confirm that your information is accurate';
-        isValid = false;
-      }
+        if (!formData.dob) newErrors.dob = 'Date of birth is required';
+        else {
+          const dob = new Date(formData.dob);
+          const today = new Date();
+          const age = today.getFullYear() - dob.getFullYear();
+          if (age < 18) newErrors.dob = 'Must be at least 18 years old';
+          if (age > 100) newErrors.dob = 'Please enter a valid date of birth';
+        }
+
+        if (!formData.gender) newErrors.gender = 'Gender is required';
+        if (!formData.nationality) newErrors.nationality = 'Nationality is required';
+        if (!formData.occupation) newErrors.occupation = 'Occupation is required';
+        break;
+
+      case 1: // Contact Details
+        if (!formData.email) newErrors.email = 'Email is required';
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) 
+          newErrors.email = 'Please enter a valid email address';
+
+        if (!formData.phone) newErrors.phone = 'Phone number is required';
+        else if (!/^\+?[\d\s-]{10,}$/.test(formData.phone)) 
+          newErrors.phone = 'Please enter a valid phone number';
+        else if (!/^\d+$/.test(formData.phone.replace(/[\s-+]/g, '')))
+          newErrors.phone = 'Phone number should only contain numbers';
+
+        if (!formData.address) newErrors.address = 'Address is required';
+        else if (formData.address.length < 5) 
+          newErrors.address = 'Address must be at least 5 characters';
+
+        if (!formData.city) newErrors.city = 'City is required';
+        else if (!/^[a-zA-Z\s]*$/.test(formData.city)) 
+          newErrors.city = 'City should only contain letters';
+
+        if (!formData.state) newErrors.state = 'State is required';
+        else if (!/^[a-zA-Z\s]*$/.test(formData.state)) 
+          newErrors.state = 'State should only contain letters';
+
+        if (!formData.zipCode) newErrors.zipCode = 'ZIP code is required';
+        else if (!/^\d{5}(-\d{4})?$/.test(formData.zipCode)) 
+          newErrors.zipCode = 'Please enter a valid ZIP code';
+        else if (!/^\d+(-\d+)?$/.test(formData.zipCode))
+          newErrors.zipCode = 'ZIP code should only contain numbers';
+
+        if (!formData.country) newErrors.country = 'Country is required';
+        else if (!/^[a-zA-Z\s]*$/.test(formData.country)) 
+          newErrors.country = 'Country should only contain letters';
+
+        if (formData.alternateContact) {
+          if (!/^\+?[\d\s-]{10,}$/.test(formData.alternateContact))
+            newErrors.alternateContact = 'Please enter a valid phone number';
+          else if (!/^\d+$/.test(formData.alternateContact.replace(/[\s-+]/g, '')))
+            newErrors.alternateContact = 'Phone number should only contain numbers';
+        }
+        break;
+
+      case 2: // Identification
+        if (!formData.idType) newErrors.idType = 'ID type is required';
+        
+        if (!formData.idNumber) newErrors.idNumber = 'ID number is required';
+        else if (!/^[A-Za-z0-9-]+$/.test(formData.idNumber))
+          newErrors.idNumber = 'ID number should only contain letters, numbers, and hyphens';
+        else if (!/^\d+$/.test(formData.idNumber.replace(/[A-Za-z-]/g, '')))
+          newErrors.idNumber = 'ID number must contain at least one number';
+
+        if (!formData.issueDate) newErrors.issueDate = 'Issue date is required';
+        else {
+          const issueDate = new Date(formData.issueDate);
+          const today = new Date();
+          if (issueDate > today) newErrors.issueDate = 'Issue date cannot be in the future';
+        }
+
+        if (!formData.expiryDate) newErrors.expiryDate = 'Expiry date is required';
+        else {
+          const expiryDate = new Date(formData.expiryDate);
+          const today = new Date();
+          if (expiryDate <= today) newErrors.expiryDate = 'Expiry date must be in the future';
+        }
+
+        if (!formData.issuingAuthority) newErrors.issuingAuthority = 'Issuing authority is required';
+        else if (!/^[a-zA-Z\s]*$/.test(formData.issuingAuthority))
+          newErrors.issuingAuthority = 'Issuing authority should only contain letters';
+
+        if (!formData.issuingCountry) newErrors.issuingCountry = 'Issuing country is required';
+        else if (!/^[a-zA-Z\s]*$/.test(formData.issuingCountry))
+          newErrors.issuingCountry = 'Issuing country should only contain letters';
+        break;
+
+      case 3: // Documentation
+        if (!formData.profilePhoto) newErrors.profilePhoto = 'Profile photo is required';
+        if (!formData.idFront) newErrors.idFront = 'ID front image is required';
+        break;
+
+      case 4: // Review
+        if (!formData.confirmation) newErrors.confirmation = 'Please confirm the information is accurate';
+        break;
     }
 
     setErrors(newErrors);
-    return isValid;
+    return Object.keys(newErrors).length === 0;
   };
 
   const nextSection = () => {
-    if (validateSection(currentSection)) {
+    if (validateSection()) {
       setCurrentSection(Math.min(currentSection + 1, sections.length - 1));
     }
   };
@@ -257,13 +334,42 @@ export default function ClientInformationPortal() {
   };
 
   const submitForm = () => {
-    if (validateSection(4)) {
-      setTimeout(() => {
-        const randomNum = Math.floor(1000 + Math.random() * 9000);
-        setClientId(`CL-${new Date().getFullYear()}-${randomNum}`);
-        setSubmissionComplete(true);
-      }, 2000);
+    if (validateSection()) {
+        setTimeout(async () => {
+            const randomNum = Math.floor(1000 + Math.random() * 9000);
+            const newClientId = `CL-${new Date().getFullYear()}-${randomNum}`;
+            setClientId(newClientId);
+            
+            // Convert File objects to base64 before storing
+            const formDataToStore = {
+                ...formData,
+                profilePhoto: formData.profilePhoto ? await fileToBase64(formData.profilePhoto) : null,
+                idFront: formData.idFront ? await fileToBase64(formData.idFront) : null,
+                idBack: formData.idBack ? await fileToBase64(formData.idBack) : null,
+                additionalDocs: formData.additionalDocs ? await Promise.all(
+                    formData.additionalDocs.map(file => fileToBase64(file))
+                ) : null
+            };
+            
+            // Save form data with unique ID
+            if (typeof window !== 'undefined') {
+                localStorage.setItem(`clientFormData_${newClientId}`, JSON.stringify(formDataToStore));
+            }
+            
+            setSubmissionComplete(true);
+        }, 2000);
     }
+  };
+
+  // Helper function to convert File to base64
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            resolve(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+    });
   };
 
   const resetForm = () => {
@@ -303,6 +409,11 @@ export default function ClientInformationPortal() {
     setErrors({});
     setCurrentSection(0);
     setSubmissionComplete(false);
+    // Clear current form data from localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('clientFormData');
+      localStorage.removeItem('clientCurrentSection');
+    }
   };
 
   useEffect(() => {

@@ -36,7 +36,9 @@ export default function RootLayout({
     "/register",
     "/forgot-password",
     "/reset-password",
-    "/client"
+    "/client",
+    "/workerinfo",
+    "/worker-information"
   ];
 
   const shouldShowHeaderFooter = !noHeaderFooterPaths.some(path => 

@@ -66,13 +66,13 @@ export default function Identification({
                         name="idType"
                         value={formData.idType}
                         onChange={handleChange}
-                        className={`w-full p-3 border-2 rounded-lg transition-all bg-[#FEF3E2] ${errors.idType ? 'border-red-500 animate-shake' : 'border-[#4C7B8B] hover:border-[#EFB036] focus:ring-2 focus:ring-[#EFB036] focus:border-transparent'}`}
+                        className={`w-full p-3 border-2 rounded-lg transition-all bg-[#FEF3E2] text-[#23486A] ${errors.idType ? 'border-red-500 animate-shake' : 'border-[#4C7B8B] hover:border-[#EFB036] focus:ring-2 focus:ring-[#EFB036] focus:border-transparent'}`}
                         required
                     >
                         <option value="">Select ID Type</option>
                         <option value="passport">Passport</option>
                         <option value="national_id">National ID</option>
-                        <option value="drivers_license">Driver's License</option>
+                        <option value="drivers_license">Driver&apos;s License</option>
                         <option value="residence_permit">Residence Permit</option>
                     </select>
                     {errors.idType && (
@@ -126,7 +126,7 @@ export default function Identification({
                         name="issueDate"
                         value={formData.issueDate}
                         onChange={handleChange}
-                        className={`w-full p-3 border-2 rounded-lg transition-all bg-[#FEF3E2] ${errors.issueDate ? 'border-red-500 animate-shake' : 'border-[#4C7B8B] hover:border-[#EFB036] focus:ring-2 focus:ring-[#EFB036] focus:border-transparent'}`}
+                        className={`w-full p-3 border-2 rounded-lg transition-all bg-[#FEF3E2] text-[#23486A] ${errors.issueDate ? 'border-red-500 animate-shake' : 'border-[#4C7B8B] hover:border-[#EFB036] focus:ring-2 focus:ring-[#EFB036] focus:border-transparent'}`}
                         required
                     />
                     {errors.issueDate && (
@@ -150,7 +150,7 @@ export default function Identification({
                         name="expiryDate"
                         value={formData.expiryDate}
                         onChange={handleChange}
-                        className={`w-full p-3 border-2 rounded-lg transition-all bg-[#FEF3E2] ${errors.expiryDate ? 'border-red-500 animate-shake' : 'border-[#4C7B8B] hover:border-[#EFB036] focus:ring-2 focus:ring-[#EFB036] focus:border-transparent'}`}
+                        className={`w-full p-3 border-2 rounded-lg transition-all bg-[#FEF3E2] text-[#23486A]  ${errors.expiryDate ? 'border-red-500 animate-shake' : 'border-[#4C7B8B] hover:border-[#EFB036] focus:ring-2 focus:ring-[#EFB036] focus:border-transparent'}`}
                         required
                     />
                     {errors.expiryDate && (
@@ -177,7 +177,7 @@ export default function Identification({
                         name="issuingAuthority"
                         value={formData.issuingAuthority}
                         onChange={handleChange}
-                        className={`w-full p-3 border-2 rounded-lg transition-all bg-[#FEF3E2] ${errors.issuingAuthority ? 'border-red-500 animate-shake' : 'border-[#4C7B8B] hover:border-[#EFB036] focus:ring-2 focus:ring-[#EFB036] focus:border-transparent'}`}
+                        className={`w-full p-3 border-2 rounded-lg transition-all bg-[#FEF3E2] text-[#23486A] ${errors.issuingAuthority ? 'border-red-500 animate-shake' : 'border-[#4C7B8B] hover:border-[#EFB036] focus:ring-2 focus:ring-[#EFB036] focus:border-transparent'}`}
                         required
                     />
                     {errors.issuingAuthority && (
@@ -201,7 +201,7 @@ export default function Identification({
                         name="issuingCountry"
                         value={formData.issuingCountry}
                         onChange={handleChange}
-                        className={`w-full p-3 border-2 rounded-lg transition-all bg-[#FEF3E2] ${errors.issuingCountry ? 'border-red-500 animate-shake' : 'border-[#4C7B8B] hover:border-[#EFB036] focus:ring-2 focus:ring-[#EFB036] focus:border-transparent'}`}
+                        className={`w-full p-3 border-2 rounded-lg transition-all bg-[#FEF3E2]  text-[#23486A] ${errors.issuingCountry ? 'border-red-500 animate-shake' : 'border-[#4C7B8B] hover:border-[#EFB036] focus:ring-2 focus:ring-[#EFB036] focus:border-transparent'}`}
                         required
                     />
                     {errors.issuingCountry && (
@@ -248,4 +248,4 @@ export default function Identification({
             </motion.div>
         </motion.div>
     );
-}
+} 
