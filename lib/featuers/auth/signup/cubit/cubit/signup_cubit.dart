@@ -40,6 +40,7 @@ class SignupCubit extends Cubit<SignupState> {
           await SharedPrefHelper.setData('password', passwordController.text);
           
           emit(SignupState.signupSuccess(signupResponse));
+          
         },
         failure: (error) {
           emit(SignupState.signupError(error: error.apiErrorModel.message ?? ''));

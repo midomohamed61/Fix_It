@@ -7,6 +7,15 @@ import 'package:fix_it/featuers/auth/signin/cubit/cubit/signin_cubit.dart';
 import 'package:fix_it/featuers/auth/signin/signinScreen.dart';
 import 'package:fix_it/featuers/auth/signup/cubit/cubit/signup_cubit.dart';
 import 'package:fix_it/featuers/auth/signup/signupScreen.dart';
+import 'package:fix_it/featuers/profile/edit_profile.dart';
+import 'package:fix_it/featuers/profile/home/Provider%20profile/CallScreen/call_screen.dart';
+import 'package:fix_it/featuers/profile/home/Provider%20profile/Date%20Time%20Selection/date_time_selection_screen.dart';
+import 'package:fix_it/featuers/profile/home/Provider%20profile/Gallery/gallery_screen%20.dart';
+import 'package:fix_it/featuers/profile/home/Provider%20profile/Location%20Address/location_address_screen.dart';
+import 'package:fix_it/featuers/profile/home/Provider%20profile/Location%20Permission/location_permission_screen.dart';
+import 'package:fix_it/featuers/profile/home/Provider%20profile/Review%20Summary/review_summary_screen.dart';
+import 'package:fix_it/featuers/profile/home/Provider%20profile/provider_profile_screen.dart';
+import 'package:fix_it/featuers/profile/my_profile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -43,6 +52,54 @@ class AppRouter {
     ),
   );
 
+       case Routes.ServiceSeekerProfile:
+  return MaterialPageRoute(
+    builder: (_) => BlocProvider.value(
+      value: getIt<SignupCubit>(),
+      child: const ProfileScreen(),
+    ),
+  );
+
+  case Routes.EditProfileScreen: // 👈 ضيف الـ case بتاع EditProfile
+        return MaterialPageRoute(
+          builder: (_) => const EditProfileScreen(),
+        );
+
+      case Routes.ProviderProfileScreen:
+        return MaterialPageRoute(
+          builder: (_) => const ProviderProfileScreen(),
+        );
+
+        case Routes.LocationPermissionScreen:
+        return MaterialPageRoute(
+          builder: (_) =>  LocationPermissionScreen(),
+        );
+
+        case Routes.LocationAddressScreen:
+        return MaterialPageRoute(
+          builder: (_) =>  LocationAddressScreen(),
+        );
+
+        case Routes.DateTimeSelectionScreen:
+        return MaterialPageRoute(
+          builder: (_) =>  DateTimeSelectionScreen(),
+        );
+
+        case Routes.ReviewSummaryScreen:
+        return MaterialPageRoute(
+          builder: (_) =>  ReviewSummaryScreen(),
+        );
+
+        case Routes.GalleryScreen:
+        return MaterialPageRoute(
+          builder: (_) =>  GalleryScreen(),
+        );
+
+        case Routes.CallScreen:
+        return MaterialPageRoute(
+          builder: (_) => const CallScreen(),
+        );
+  
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(

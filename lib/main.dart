@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'Fix It',
         home: child,
-        initialRoute: Routes.SigninScreen,
+        initialRoute: Routes.ProviderProfileScreen,
         onGenerateRoute: AppRouter().generateRoute,
       ),
     );

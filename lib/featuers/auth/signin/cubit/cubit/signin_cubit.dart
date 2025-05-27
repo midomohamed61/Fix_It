@@ -34,9 +34,10 @@ class SigninCubit extends Cubit<SigninState> {
     response.when(
       success: (loginResponse) async {
         final token = loginResponse.userData?.token ?? '';
+        final userName = loginResponse.userData?.userName ?? emailController.text;
 
         // Save Token & Set Header
-        await _saveUserToken(token);
+       await _saveUserData(token, userName);
 
         emit(SigninState.success(loginResponse));
       },
@@ -47,8 +48,9 @@ class SigninCubit extends Cubit<SigninState> {
   }
 
   // Save Token Locally and Add it to Dio Header
-  Future<void> _saveUserToken(String token) async {
-    await SharedPrefHelper.setData('userToken', token); // Saving token
+Future<void> _saveUserData(String token, String userName) async {
+    await SharedPrefHelper.setData('userToken', token);
+    await SharedPrefHelper.setData('userName', userName);
     DioFactory.setTokenIntoHeaderAfterLogin(token);
   }
 }

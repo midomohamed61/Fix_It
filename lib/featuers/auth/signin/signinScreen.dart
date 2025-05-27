@@ -57,7 +57,7 @@ class SignInScreen extends StatelessWidget {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Login Successful!')),
                       );
-                      Navigator.pushNamed(context, '/RoleSelectionScreen');
+                      Navigator.pushReplacementNamed(context, '/RoleSelectionScreen');
                     } else if (state is Error) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text(state.error)),
