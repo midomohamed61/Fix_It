@@ -215,4 +215,4 @@ const ChatBot = () => {
   );
 };
 
-export default ChatBot;
+export default React.memo(ChatBot);
