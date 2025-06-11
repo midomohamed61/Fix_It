@@ -10,6 +10,7 @@ import { Pages} from '@/lib/config/constants';
 import { FaEye, FaEyeSlash, FaApple, FaGoogle, FaFacebook } from 'react-icons/fa';
 import { HiOutlineMail, HiOutlineLockClosed } from 'react-icons/hi';
 import { storage } from '../../lib/utils/storage';
+import { Alert } from '@/components/ui/Feedback/Alert';
 
 export default function LoginForm() {
   const [formData, setFormData] = useState({
@@ -18,6 +19,7 @@ export default function LoginForm() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const router = useRouter();
@@ -48,11 +50,11 @@ export default function LoginForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
 
     // Field validation
     if (!formData.email || !formData.password) {
       setError('Please fill in all fields');
-      alert('Please fill in all required fields!');
       return;
     }
 
@@ -64,21 +66,22 @@ export default function LoginForm() {
       
       if (!user) {
         setError('User not found');
-        alert('User not found. Please check your email or register.');
         setIsLoading(false);
         return;
       }
       
       if (user.password !== formData.password) {
         setError('Invalid password');
-        alert('Invalid password. Please try again.');
         setIsLoading(false);
         return;
       }
       
       // Handle remember me preference
-      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-      rememberMe ? storage.setRememberedEmail(formData.email) : storage.clearRememberedEmail();
+      if (rememberMe) {
+        storage.setRememberedEmail(formData.email);
+      } else {
+        storage.clearRememberedEmail();
+      }
       
       // Set user data in storage
       storage.setCurrentUser(user);
@@ -89,12 +92,14 @@ export default function LoginForm() {
         storage.setToken(demoToken);
       }
       
-      alert('Login successful! Redirecting to dashboard...');
-      router.push("/client");
+      setSuccess('Login successful! Redirecting to dashboard...');
+      
+      setTimeout(() => {
+        router.push("/client");
+      }, 1500);
     } catch (error) {
       console.error('Login failed:', error);
       setError('An unexpected error occurred');
-      alert('Login failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -113,15 +118,28 @@ export default function LoginForm() {
         <div className="p-6 space-y-6">
           {/* Status Messages */}
           {isLoading && (
-            <div className="bg-[#4C7B8B] text-[#F5EEDC] p-3 rounded-lg text-center animate-pulse">
-              Authenticating...
-            </div>
+            <Alert
+              type="info"
+              message="Authenticating..."
+              className="animate-pulse"
+            />
           )}
           
           {error && (
-            <div className="bg-[#EFB036] text-[#23486A] p-3 rounded-lg text-center font-medium">
-              {error}
-            </div>
+            <Alert
+              type="error"
+              title="Error"
+              message={error}
+              onClose={() => setError('')}
+            />
+          )}
+
+          {success && (
+            <Alert
+              type="success"
+              title="Success"
+              message={success}
+            />
           )}
 
           {/* Login Form */}

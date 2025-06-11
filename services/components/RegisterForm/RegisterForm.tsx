@@ -13,6 +13,15 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/RadioGroup/RadioGrou
 import PasswordValidation from '@/components/PasswordValidation/PasswordValidation';
 import { signup } from '@/lib/api/auth';
 import type { AxiosError } from 'axios';
+import { Alert } from '@/components/ui/Feedback/Alert';
+
+// Add these new interfaces
+interface SocialUser {
+  id: string;
+  name: string;
+  email: string;
+  provider: 'google' | 'facebook' | 'apple';
+}
 
 export default function RegisterForm() {
   const [formData, setFormData] = useState({
@@ -24,6 +33,7 @@ export default function RegisterForm() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const router = useRouter();
 
@@ -55,6 +65,7 @@ export default function RegisterForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
 
     if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword || !formData.role) {
       setError('Please fill in all fields');
@@ -109,15 +120,52 @@ export default function RegisterForm() {
         localStorage.removeItem('rememberedEmail');
       }
 
-      alert('Registration successful!');
+      setSuccess('Registration successful! Redirecting...');
 
-      if (formData.role === 'client') {
-        router.push('/clientinfo');
-      } else {
-        router.push('/workerinfo');
-      }
+      setTimeout(() => {
+        if (formData.role === 'client') {
+          router.push('/clientinfo');
+        } else {
+          router.push('/workerinfo');
+        }
+      }, 1500);
     } catch (error) {
       setError('An unexpected error occurred');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSocialAuth = async (provider: 'google' | 'facebook' | 'apple') => {
+    setIsLoading(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      // Simulate social authentication
+      const mockSocialUser: SocialUser = {
+        id: `social_${Date.now()}`,
+        name: `Social User ${provider}`,
+        email: `user@${provider}.com`,
+        provider
+      };
+
+      // Store the social user in localStorage
+      localStorage.setItem('currentUser', JSON.stringify(mockSocialUser));
+      localStorage.setItem('token', Date.now().toString());
+
+      // Handle remember me
+      if (rememberMe) {
+        localStorage.setItem('rememberedEmail', mockSocialUser.email);
+      }
+
+      setSuccess(`Successfully authenticated with ${provider}! Redirecting...`);
+
+      setTimeout(() => {
+        router.push('/clientinfo');
+      }, 1500);
+    } catch (error) {
+      setError(`Failed to authenticate with ${provider}`);
     } finally {
       setIsLoading(false);
     }
@@ -133,15 +181,28 @@ export default function RegisterForm() {
 
         <div className="p-6 space-y-6">
           {isLoading && (
-            <div className="bg-[#4C7B8B] text-[#F5EEDC] p-3 rounded-lg text-center animate-pulse border border-[#EFB036]/20">
-              Creating account...
-            </div>
+            <Alert
+              type="info"
+              message="Creating account..."
+              className="animate-pulse"
+            />
           )}
           
           {error && (
-            <div className="bg-[#EFB036] text-[#23486A] p-3 rounded-lg text-center font-medium border border-[#EFB036]/70">
-              {error}
-            </div>
+            <Alert
+              type="error"
+              title="Error"
+              message={error}
+              onClose={() => setError('')}
+            />
+          )}
+
+          {success && (
+            <Alert
+              type="success"
+              title="Success"
+              message={success}
+            />
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -267,33 +328,42 @@ export default function RegisterForm() {
           <div className="grid grid-cols-3 gap-3">
             <Button  
               type="button"
+              onClick={() => handleSocialAuth('apple')}
+              disabled={isLoading}
               className={cn(
                 "flex justify-center items-center py-2 px-4 rounded-lg transition-all",
                 "bg-[#e6a72b] hover:bg-[#e6a72b]/90 text-[#F5EEDC] hover:text-[#23486A]",
                 "border border-[#EFB036]/50 hover:border-[#EFB036]",
-                "shadow-[0_2px_8px_rgba(239,176,54,0.2)] hover:shadow-[0_4px_12px_rgba(239,176,54,0.3)]"
+                "shadow-[0_2px_8px_rgba(239,176,54,0.2)] hover:shadow-[0_4px_12px_rgba(239,176,54,0.3)]",
+                isLoading && "opacity-70 cursor-not-allowed"
               )}
             >
               <FaApple className="h-5 w-5" />
             </Button>
             <Button
               type="button"
+              onClick={() => handleSocialAuth('google')}
+              disabled={isLoading}
               className={cn(
                 "flex justify-center items-center py-2 px-4 rounded-lg transition-all",
                 "bg-[#e6a72b] hover:bg-[#e6a72b]/90 text-[#F5EEDC] hover:text-[#23486A]",
                 "border border-[#EFB036]/50 hover:border-[#EFB036]",
-                "shadow-[0_2px_8px_rgba(239,176,54,0.2)] hover:shadow-[0_4px_12px_rgba(239,176,54,0.3)]"
+                "shadow-[0_2px_8px_rgba(239,176,54,0.2)] hover:shadow-[0_4px_12px_rgba(239,176,54,0.3)]",
+                isLoading && "opacity-70 cursor-not-allowed"
               )}
             >
               <FaGoogle className="h-5 w-5" />
             </Button>
             <Button
               type="button"
+              onClick={() => handleSocialAuth('facebook')}
+              disabled={isLoading}
               className={cn(
                 "flex justify-center items-center py-2 px-4 rounded-lg transition-all",
                 "bg-[#e6a72b] hover:bg-[#e6a72b]/90 text-[#F5EEDC] hover:text-[#23486A]",
                 "border border-[#EFB036]/50 hover:border-[#EFB036]",
-                "shadow-[0_2px_8px_rgba(239,176,54,0.2)] hover:shadow-[0_4px_12px_rgba(239,176,54,0.3)]"
+                "shadow-[0_2px_8px_rgba(239,176,54,0.2)] hover:shadow-[0_4px_12px_rgba(239,176,54,0.3)]",
+                isLoading && "opacity-70 cursor-not-allowed"
               )}
             >
               <FaFacebook className="h-5 w-5" />
