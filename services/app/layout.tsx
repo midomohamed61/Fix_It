@@ -7,7 +7,7 @@ import Header from "@/components/layouts/Header/Header";
 import Footer from "@/components/layouts/Footer/Footer";
 import { usePathname } from "next/navigation";
 import { LanguageProvider } from "@/components/ui/LanguageToggle/LanguageContext";
-
+import ChatBot from "@/components/ChatBot/ChatBot"
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -50,6 +50,7 @@ export default function RootLayout({
       <body className={`${roboto.className} ${geistSans.variable} ${geistMono.variable} antialiased`}>
         <LanguageProvider>
           {shouldShowHeaderFooter && <Header />}
+          <ChatBot/>
           {children}
           {shouldShowHeaderFooter && <Footer />}
         </LanguageProvider>

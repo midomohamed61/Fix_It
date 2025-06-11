@@ -45,6 +45,8 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+axios.defaults.headers.common['Authorization'] = `Bearer ${storage.getToken()}`;
+
 // Get all users
 export const getUsers = async (): Promise<User[]> => {
   try {
@@ -111,6 +113,8 @@ export const registerUser = async (userData: Omit<User, 'id'>): Promise<AuthResp
     // Generate a token
     const token = `auth-token-${response.data.id}-${Date.now()}`;
     
+    localStorage.setItem('token', response.data.token);
+    
     return {
       success: true,
       user: response.data,
@@ -151,6 +155,8 @@ export const loginUser = async (email: string, password: string): Promise<AuthRe
     
     // Return sanitized user (without password)
     const { password: _, ...safeUser } = user;
+    
+    localStorage.setItem('token', response.data.token);
     
     return {
       success: true,
@@ -218,3 +224,12 @@ export const deleteUser = async (id: string): Promise<AuthResponse> => {
     };
   }
 };
+
+export const signup = (data: { email: string; name: string; password: string; role: string }) =>
+  axios.post(`${API_URL}/auth/signup`, data);
+
+export const activate = (data: { email: string; code: string }) =>
+  axios.post(`${API_URL}/auth/active`, data);
+
+export const login = (data: { email: string; password: string }) =>
+  axios.post(`${API_URL}/auth/login`, data);

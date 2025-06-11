@@ -6,12 +6,13 @@ import { Label } from '@/components/ui/Form/Label';
 import { Input } from '@/components/ui/Form/Input';
 import { Button } from '@/components/ui/Button/Button';
 import { cn } from '@/lib/utils/formatting';
-import { FaApple, FaEye, FaEyeSlash, FaFacebook, FaGoogle } from 'react-icons/fa';
-import { HiOutlineMail, HiOutlineLockClosed, HiOutlineUser } from 'react-icons/hi';
-import { storage } from '@/lib/utils/storage';
+import { FaApple, FaFacebook, FaGoogle } from 'react-icons/fa';
+import { HiOutlineMail, HiOutlineUser } from 'react-icons/hi';
 import { Pages } from '@/lib/config/constants';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/RadioGroup/RadioGroup";
 import PasswordValidation from '@/components/PasswordValidation/PasswordValidation';
+import { signup } from '@/lib/api/auth';
+import type { AxiosError } from 'axios';
 
 export default function RegisterForm() {
   const [formData, setFormData] = useState({
@@ -23,20 +24,19 @@ export default function RegisterForm() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    const token = storage.getToken();
+    const token = localStorage.getItem('token');
     if (token) {
       router.push(Pages.LOGIN);
       return;
     }
 
-    const rememberedEmail = storage.getRememberedEmail();
+    const rememberedEmail = localStorage.getItem('rememberedEmail');
     if (rememberedEmail) {
       setFormData(prev => ({ ...prev, email: rememberedEmail }));
       setRememberMe(true);
@@ -71,44 +71,52 @@ export default function RegisterForm() {
       return;
     }
 
-    if (storage.getUserByEmail(formData.email)) {
-      setError('Account already exists');
-      return;
-    }
-
     setIsLoading(true);
 
     try {
+      // Get existing users from localStorage
+      const existingUsers = JSON.parse(localStorage.getItem('users') || '[]');
+      
+      // Check if email already exists
+      if (existingUsers.some((user: any) => user.email === formData.email)) {
+        setError('Email already registered');
+        setIsLoading(false);
+        return;
+      }
+
+      // Create new user object
       const newUser = {
+        id: Date.now().toString(),
         name: formData.name,
         email: formData.email,
         password: formData.password,
-        role: formData.role, // Save the role
-        createdAt: Date.now()
+        role: formData.role.toUpperCase() === 'CLIENT' ? 'USER' : 'WORKER',
+        createdAt: new Date().toISOString()
       };
 
-      storage.setUser({
-        ...newUser,
-        profileImage: '/images/default-profile.jpg'
-      });
-      const demoToken = `demo-token-${crypto.randomUUID()}`;
-      storage.setToken(demoToken);
-      
-      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-      rememberMe 
-        ? storage.setRememberedEmail(formData.email)
-        : storage.clearRememberedEmail();
+      // Add new user to existing users
+      existingUsers.push(newUser);
+      localStorage.setItem('users', JSON.stringify(existingUsers));
+
+      // Store current user session
+      localStorage.setItem('currentUser', JSON.stringify(newUser));
+      localStorage.setItem('token', Date.now().toString());
+
+      // Handle remember me
+      if (rememberMe) {
+        localStorage.setItem('rememberedEmail', formData.email);
+      } else {
+        localStorage.removeItem('rememberedEmail');
+      }
 
       alert('Registration successful!');
-      
-      // Route based on role
+
       if (formData.role === 'client') {
         router.push('/clientinfo');
       } else {
         router.push('/workerinfo');
       }
     } catch (error) {
-      console.error('Registration failed:', error);
       setError('An unexpected error occurred');
     } finally {
       setIsLoading(false);
@@ -297,7 +305,7 @@ export default function RegisterForm() {
           <p className="text-[#F5EEDC] text-sm">
             Already have an account?{' '}
             <Link 
-              href="/log in" 
+              href="/login" 
               className="text-[#EFB036] font-medium hover:underline hover:text-[#F5EEDC] transition-colors"
             >
               Login
