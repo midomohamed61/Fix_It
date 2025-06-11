@@ -11,6 +11,7 @@ export enum Languages {
     CART = "cart",
     PROFILE = "profile",
     ADMIN = "admin",
+    DETAILS = "details",
   }
   
   export enum Pages {
