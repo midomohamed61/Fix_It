@@ -18,6 +18,8 @@ import 'package:fix_it/featuers/profile/home/Provider%20profile/provider_profile
 import 'package:fix_it/featuers/profile/my_profile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fix_it/featuers/BottomNavBar.dart';
+import 'package:fix_it/featuers/city/CityScreen.dart';
 
 class AppRouter {
   Route? generateRoute(RouteSettings setting) {
@@ -98,6 +100,17 @@ class AppRouter {
         case Routes.CallScreen:
         return MaterialPageRoute(
           builder: (_) => const CallScreen(),
+        );
+        case Routes.BottomNavBar:
+        return MaterialPageRoute(
+          builder: (_) => BottomNavBar(
+            currentIndex: 0,
+            onTap: (index) {},
+          ),
+        );
+        case Routes.CityScreen:
+        return MaterialPageRoute(
+          builder: (_) => const CityScreen(),
         );
   
       default:

@@ -12,5 +12,6 @@ class Routes {
   static const String ReviewSummaryScreen = '/ReviewSummaryScreen';
   static const String GalleryScreen = '/GalleryScreen';
   static const String CallScreen = '/CallScreen';
-
+  static const String BottomNavBar = '/BottomNavBar';
+  static const String CityScreen = '/CityScreen';
 }

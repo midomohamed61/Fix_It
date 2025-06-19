@@ -4,6 +4,7 @@ import 'package:fix_it/core/routing/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await setupGetIt(); // خليه هنا بس
@@ -15,6 +16,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return ScreenUtilInit(
       designSize: const Size(375, 812),
       minTextAdapt: true,
@@ -23,7 +25,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'Fix It',
         home: child,
-        initialRoute: Routes.ProviderProfileScreen,
+        initialRoute: Routes.CityScreen,
         onGenerateRoute: AppRouter().generateRoute,
       ),
     );
