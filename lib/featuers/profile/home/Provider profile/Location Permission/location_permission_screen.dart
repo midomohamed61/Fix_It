@@ -5,6 +5,8 @@ import 'package:latlong2/latlong.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class LocationPermissionScreen extends StatefulWidget {
+  const LocationPermissionScreen({super.key});
+
   @override
   _LocationPermissionScreenState createState() => _LocationPermissionScreenState();
 }

@@ -5,7 +5,7 @@ import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:geolocator/geolocator.dart';
 
 class CityScreen extends StatefulWidget {
-  const CityScreen({Key? key}) : super(key: key);
+  const CityScreen({super.key});
 
   @override
   State<CityScreen> createState() => _CityScreenState();

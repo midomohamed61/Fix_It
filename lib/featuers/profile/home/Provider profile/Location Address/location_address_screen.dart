@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 
 
 class LocationAddressScreen extends StatefulWidget {
+  const LocationAddressScreen({super.key});
+
   @override
   _LocationAddressScreenState createState() => _LocationAddressScreenState();
 }

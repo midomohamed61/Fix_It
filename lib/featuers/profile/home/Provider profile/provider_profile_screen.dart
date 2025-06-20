@@ -157,7 +157,7 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
               child: Text('Review', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textColor)),
             ),
             const SizedBox(height: 8),
-            ...reviews.map((review) => ReviewTile(review: review)).toList(),
+            ...reviews.map((review) => ReviewTile(review: review)),
             const SizedBox(height: 24),
           ],
         ),

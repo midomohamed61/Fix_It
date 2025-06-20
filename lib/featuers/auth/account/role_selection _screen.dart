@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'cubit/service_type_cubit.dart';
 
 class RoleSelectionScreen extends StatelessWidget {
-  const RoleSelectionScreen({Key? key}) : super(key: key);
+  const RoleSelectionScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

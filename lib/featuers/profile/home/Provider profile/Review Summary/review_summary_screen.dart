@@ -3,7 +3,7 @@ import 'package:fix_it/core/themes/app_colors.dart';
 import 'package:fix_it/core/helpers/shared_pref_helper.dart';
 
 class ReviewSummaryScreen extends StatelessWidget {
-  const ReviewSummaryScreen({Key? key}) : super(key: key);
+  const ReviewSummaryScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -20,6 +20,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fix_it/featuers/BottomNavBar.dart';
 import 'package:fix_it/featuers/city/CityScreen.dart';
+import 'package:fix_it/featuers/order/order_screen.dart';
+import 'package:fix_it/featuers/payment/payment_method_screen.dart';
+
 
 class AppRouter {
   Route? generateRoute(RouteSettings setting) {
@@ -112,8 +115,15 @@ class AppRouter {
         return MaterialPageRoute(
           builder: (_) => const CityScreen(),
         );
-  
-      default:
+        case Routes.OrderScreen:
+          return MaterialPageRoute(
+            builder: (_) => const OrderScreen(),
+          );
+        case Routes.PaymentMethodScreen:
+          return MaterialPageRoute(
+            builder: (_) => const PaymentMethodScreen(),
+          );
+        default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(
             body: Center(

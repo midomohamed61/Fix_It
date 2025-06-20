@@ -5,7 +5,7 @@ import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:fix_it/featuers/auth/signup/cubit/cubit/signup_cubit.dart';
 
 class PhoneVerificationScreen extends StatelessWidget {
-  const PhoneVerificationScreen({Key? key}) : super(key: key);
+  const PhoneVerificationScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

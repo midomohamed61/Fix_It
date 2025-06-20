@@ -1,4 +1,3 @@
-import 'package:fix_it/core/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class AuthCustomAppBar extends StatelessWidget implements PreferredSizeWidget {

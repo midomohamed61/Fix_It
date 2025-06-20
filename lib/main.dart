@@ -1,9 +1,14 @@
 import 'package:fix_it/core/di/di.dart';
 import 'package:fix_it/core/routing/app_router.dart';
-import 'package:fix_it/core/routing/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
+import 'featuers/BottomNavBar.dart';
+import 'featuers/city/CityScreen.dart';
+import 'featuers/profile/my_profile.dart';
+import 'featuers/order/order_screen.dart';
+import 'package:fix_it/core/themes/app_colors.dart';
+import 'featuers/home/HomeScreen.dart';
+import 'featuers/payment/payment_method_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -11,12 +16,67 @@ void main() async {
   runApp(const MyApp());
 }
 
+class MainScreen extends StatefulWidget {
+  const MainScreen({super.key});
+
+  @override
+  State<MainScreen> createState() => _MainScreenState();
+}
+
+class _MainScreenState extends State<MainScreen> {
+  int _currentIndex = 0;
+
+  final List<Widget> _screens = [
+    // يمكنك استبدال Container() بشاشتك الرئيسية لاحقًا
+     HomeScreen(),
+    CityScreen(),
+    OrderScreen(),
+    ProfileScreen(),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.backgroundColor,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: IndexedStack(
+            index: _currentIndex,
+            children: _screens,
+          ),
+        ),
+      ),
+      bottomNavigationBar: BottomNavBar(
+        currentIndex: _currentIndex,
+        onTap: (index) async {
+          // إذا كان index هو صفحة الدفع، انتظر النتيجة
+          if (index == 2) { // مثال: إذا كانت صفحة الدفع هي الثالثة
+            final result = await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const PaymentMethodScreen()),
+            );
+            if (result == 0) {
+              setState(() {
+                _currentIndex = 0;
+              });
+              return;
+            }
+          }
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+      ),
+    );
+  }
+}
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-
     return ScreenUtilInit(
       designSize: const Size(375, 812),
       minTextAdapt: true,
@@ -24,8 +84,8 @@ class MyApp extends StatelessWidget {
       builder: (context, child) => MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Fix It',
-        home: child,
-        initialRoute: Routes.CityScreen,
+        home: const MainScreen(),
+        // initialRoute: Routes.BottomNavBar, // لم تعد ضرورية
         onGenerateRoute: AppRouter().generateRoute,
       ),
     );

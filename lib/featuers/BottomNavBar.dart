@@ -1,39 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:fix_it/core/themes/app_colors.dart';
-import 'package:fix_it/core/routing/routes.dart'; 
+import 'home/HomeScreen.dart';
 
 class BottomNavBar extends StatefulWidget {
   final int currentIndex;
   final Function(int) onTap;
 
   const BottomNavBar({
-    Key? key,
+    super.key,
     required this.currentIndex,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   State<BottomNavBar> createState() => _BottomNavBarState();
 }
 
 class _BottomNavBarState extends State<BottomNavBar> {
+  final List<Widget> _screens = const [
+    HomeScreen(),
+    // أضف الشاشات الأخرى هنا مثل CityScreen, OrderScreen, ProfileScreen
+  ];
+
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
       currentIndex: widget.currentIndex,
-      onTap: (index) {
-
-        if (index == 0) {
-          //Navigator.pushNamed(context, Routes.HomeScreen);
-        } else if (index == 1) {
-          Navigator.pushNamed(context, Routes.CityScreen);
-        } else if (index == 2) {
-          //Navigator.pushNamed(context, Routes.OrderScreen);
-        } else if (index == 3) {
-          //Navigator.pushNamed(context, Routes.ProfileScreen);
-        }
-        widget.onTap(index);
-      },
+      onTap: widget.onTap,
       type: BottomNavigationBarType.fixed,
       selectedItemColor: AppColors.primaryColor, // اللون الأزرق للأيقونة المختارة
       unselectedItemColor: AppColors.greyTextColor, // لون الأيقونات غير المختارة
