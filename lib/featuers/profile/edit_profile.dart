@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:fix_it/core/helpers/shared_pref_helper.dart';
 import 'package:fix_it/core/themes/app_colors.dart';
 import 'package:intl/intl.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -18,6 +20,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final TextEditingController _dobController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   String _selectedCountry = 'Egypt';
+  final List<String> _countries = ['Egypt', 'Mexico', 'USA', 'UK'];
+  File? _profileImage;
 
   @override
   void initState() {
@@ -30,7 +34,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _emailController.text = await SharedPrefHelper.getString('userEmail') ?? '';
     _dobController.text = await SharedPrefHelper.getString('userDob') ?? '';
     _phoneController.text = await SharedPrefHelper.getString('userPhone') ?? '';
-    _selectedCountry = await SharedPrefHelper.getString('userCountry') ?? 'Egypt';
+    final savedCountry = await SharedPrefHelper.getString('userCountry');
+    if (savedCountry != null && _countries.contains(savedCountry)) {
+      _selectedCountry = savedCountry;
+    } else {
+      _selectedCountry = _countries.first;
+    }
+    final imagePath = await SharedPrefHelper.getString('profileImage');
+    if (imagePath != null && imagePath.isNotEmpty) {
+      _profileImage = File(imagePath);
+    }
     setState(() {});
   }
 
@@ -60,6 +73,49 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
+  Future<void> _pickImage(ImageSource source) async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: source);
+    if (pickedFile != null) {
+      setState(() {
+        _profileImage = File(pickedFile.path);
+      });
+      await SharedPrefHelper.setData('profileImage', pickedFile.path);
+    }
+  }
+
+  void _showImageSourceDialog() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Choose from gallery'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.gallery);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Take a photo'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.camera);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -83,13 +139,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               Center(
                 child: Stack(
                   alignment: Alignment.bottomRight,
-                  children: const [
-                    CircleAvatar(radius: 48),
+                  children: [
                     CircleAvatar(
-                      radius: 14,
-                      backgroundColor: AppColors.primaryColor,
-                      child: Icon(Icons.edit, size: 16, color: Colors.white),
-                    )
+                      radius: 48,
+                      backgroundImage: _profileImage != null
+                          ? FileImage(_profileImage!)
+                          : const AssetImage('assets/images/profile.png') as ImageProvider,
+                    ),
+                    GestureDetector(
+                      onTap: _showImageSourceDialog,
+                      child: const CircleAvatar(
+                        radius: 14,
+                        backgroundColor: AppColors.primaryColor,
+                        child: Icon(Icons.edit, size: 16, color: Colors.white),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -150,7 +214,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       padding: const EdgeInsets.only(bottom: 16),
       child: DropdownButtonFormField<String>(
         value: _selectedCountry,
-        items: ['Egypt', 'Mexico', 'USA', 'UK']
+        items: _countries
             .map((c) => DropdownMenuItem(value: c, child: Text(c)))
             .toList(),
         onChanged: (val) => setState(() => _selectedCountry = val ?? 'Egypt'),

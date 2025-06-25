@@ -17,4 +17,6 @@ class Routes {
   static const String OrderScreen = '/OrderScreen';
   static const String PaymentMethodScreen = '/PaymentMethodScreen';
   static const String PaidOrdersScreen = '/PaidOrdersScreen';
+  static const String NotificationScreen = '/NotificationScreen';
+  static const String HelpSupportScreen = '/HelpSupportScreen';
 }

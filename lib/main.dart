@@ -38,36 +38,7 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: IndexedStack(
-            index: _currentIndex,
-            children: _screens,
-          ),
-        ),
-      ),
-      bottomNavigationBar: BottomNavBar(
-        currentIndex: _currentIndex,
-        onTap: (index) async {
-          // إذا كان index هو صفحة الدفع، انتظر النتيجة
-          if (index == 2) { // مثال: إذا كانت صفحة الدفع هي الثالثة
-            final result = await Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const PaymentMethodScreen()),
-            );
-            if (result == 0) {
-              setState(() {
-                _currentIndex = 0;
-              });
-              return;
-            }
-          }
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-      ),
+      body: const BottomNavBar(),
     );
   }
 }

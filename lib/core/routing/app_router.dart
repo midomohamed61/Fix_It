@@ -22,6 +22,8 @@ import 'package:fix_it/featuers/BottomNavBar.dart';
 import 'package:fix_it/featuers/city/CityScreen.dart';
 import 'package:fix_it/featuers/order/order_screen.dart';
 import 'package:fix_it/featuers/payment/payment_method_screen.dart';
+import 'package:fix_it/featuers/profile/notification_screen.dart';
+import 'package:fix_it/featuers/profile/help_support_screen.dart';
 
 
 class AppRouter {
@@ -106,10 +108,7 @@ class AppRouter {
         );
         case Routes.BottomNavBar:
         return MaterialPageRoute(
-          builder: (_) => BottomNavBar(
-            currentIndex: 0,
-            onTap: (index) {},
-          ),
+          builder: (_) => const BottomNavBar(),
         );
         case Routes.CityScreen:
         return MaterialPageRoute(
@@ -122,6 +121,14 @@ class AppRouter {
         case Routes.PaymentMethodScreen:
           return MaterialPageRoute(
             builder: (_) => const PaymentMethodScreen(),
+          );
+        case Routes.NotificationScreen:
+          return MaterialPageRoute(
+            builder: (_) => const NotificationScreen(),
+          );
+        case Routes.HelpSupportScreen:
+          return MaterialPageRoute(
+            builder: (_) => const HelpSupportScreen(),
           );
         default:
         return MaterialPageRoute(
