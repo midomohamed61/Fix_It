@@ -3,75 +3,147 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:fix_it/featuers/auth/signup/cubit/cubit/signup_cubit.dart';
+import 'package:fix_it/core/networking/api_result.dart';
+import 'dart:async';
+import 'package:fix_it/featuers/city/CityScreen.dart';
 
-class PhoneVerificationScreen extends StatelessWidget {
-  const PhoneVerificationScreen({super.key});
+class PhoneVerificationScreen extends StatefulWidget {
+  final String email;
+  const PhoneVerificationScreen({super.key, required this.email});
+
+  @override
+  State<PhoneVerificationScreen> createState() => _PhoneVerificationScreenState();
+}
+
+class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
+  final TextEditingController _pinController = TextEditingController();
+  int _seconds = 60;
+  Timer? _timer;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _startTimer();
+  }
+
+  void _startTimer() {
+    _timer?.cancel();
+    _seconds = 60;
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_seconds > 0) {
+        setState(() => _seconds--);
+      } else {
+        timer.cancel();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _pinController.dispose();
+    super.dispose();
+  }
+
+  void _verifyCode() async {
+    print('Start verify: email=${widget.email}, code=${_pinController.text}');
+    setState(() => _isLoading = true);
+    final cubit = context.read<SignupCubit>();
+    final result = await cubit.activateAccount(widget.email, _pinController.text);
+    setState(() => _isLoading = false);
+    print('Activation result: $result');
+    if (result is Success) {
+      print('Activation success, navigating to LocationAddressScreen');
+      Navigator.pushReplacementNamed(context, '/LocationAddressScreen');
+    } else if (result is Failure) {
+      print('Activation failed: ${(result as Failure).errorHandler.message}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text((result as Failure).errorHandler.message ?? 'Activation failed')),
+      );
+    }
+  }
+
+  void _resendCode() {
+    // TODO: استدعاء API لإعادة إرسال الكود إذا توفر
+    _startTimer();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final signupCubit = context.read<SignupCubit>();
-
     return Scaffold(
       appBar: AppBar(
+        leading: const BackButton(),
+        title: Image.asset('assets/images/Frame.png', height: 30),
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                Icon(Icons.more_horiz, color: Colors.blue[900]),
+                Icon(Icons.more_horiz, color: Colors.blue[900]),
+              ],
+            ),
+          ),
+        ],
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        padding: const EdgeInsets.all(24.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
             const Text(
-              "Enter your Phone number to verify",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              "Enter 5-digit PIN code sent to your phone number",
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 20),
-            InternationalPhoneNumberInput(
-  onInputChanged: (PhoneNumber number) {
-    signupCubit.phoneController.text = number.phoneNumber ?? "";
-  },
-  onInputValidated: (bool value) {
-    print(value);
-  },
-  selectorConfig: const SelectorConfig(
-    selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
-  ),
-  textFieldController: signupCubit.phoneController,
-  formatInput: true,
-  keyboardType: const TextInputType.numberWithOptions(signed: true, decimal: true),
-  inputDecoration: InputDecoration(
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8.0),
-    ),
-    hintText: 'Phone Number',
-  ),
-  initialValue: PhoneNumber(isoCode: 'ُEG'),
-  ignoreBlank: false,
-  autoValidateMode: AutovalidateMode.disabled,
-  selectorTextStyle: const TextStyle(color: Colors.black),
-),
-            const SizedBox(height: 30),
+            const SizedBox(height: 32),
+            TextField(
+              controller: _pinController,
+              maxLength: 5,
+              keyboardType: TextInputType.number,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 24, letterSpacing: 16),
+              decoration: const InputDecoration(
+                counterText: "",
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 32),
             SizedBox(
               width: double.infinity,
+              height: 48,
               child: ElevatedButton(
-                onPressed: () {
-                  // Call SignupCubit function to process phone number
-                  Navigator.pushNamed(context, '/nextScreen'); // مثلاً
-                },
+                onPressed: _isLoading ? null : _verifyCode,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryColor,
-                  padding: const EdgeInsets.symmetric(vertical: 14.0),
+                  backgroundColor: const Color(0xFF1566C2),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
-                child: const Text(
-                  "Send Code",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500,color: AppColors.backgroundColor),
-                ),
+                child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text("Verify", style: TextStyle(fontSize: 18, color: Colors.white)),
               ),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  '$_seconds',
+                  style: const TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(width: 8),
+                const Text('Did not received code?'),
+                TextButton(
+                  onPressed: _seconds == 0 ? _resendCode : null,
+                  child: const Text('send again', style: TextStyle(color: Color(0xFF1566C2))),
+                ),
+              ],
             ),
           ],
         ),

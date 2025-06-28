@@ -5,7 +5,7 @@ import 'package:fix_it/featuers/auth/account/phone_verification_screen.dart';
 import 'package:fix_it/featuers/auth/account/role_selection%20_screen.dart';
 import 'package:fix_it/featuers/auth/signin/cubit/cubit/signin_cubit.dart';
 import 'package:fix_it/featuers/auth/signin/signinScreen.dart';
-import 'package:fix_it/featuers/auth/signup/cubit/cubit/signup_cubit.dart';
+import 'package:fix_it/featuers/auth/signup/cubit/cubit/signup_cubit.dart' as signup;
 import 'package:fix_it/featuers/auth/signup/signupScreen.dart';
 import 'package:fix_it/featuers/profile/edit_profile.dart';
 import 'package:fix_it/featuers/profile/home/Provider%20profile/CallScreen/call_screen.dart';
@@ -39,98 +39,89 @@ class AppRouter {
       case Routes.SignupScreen:
         return MaterialPageRoute(
           builder: (_) => BlocProvider(
-            create: (context) => getIt<SignupCubit>(),
+            create: (context) => getIt<signup.SignupCubit>(),
             child: const SignUpScreen(),
           ),
         );
-        case Routes.RoleSelectionScreen:
-  return MaterialPageRoute(
-    builder: (context) => BlocProvider(
-      create: (context) => getIt<ServiceTypeCubit>(),
-      child: const RoleSelectionScreen(),
-    ),
-  );
-
-        case Routes.PhoneVerificationScreen:
-  return MaterialPageRoute(
-    builder: (_) => BlocProvider.value(
-      value: getIt<SignupCubit>(),
-      child: const PhoneVerificationScreen(),
-    ),
-  );
-
-       case Routes.ServiceSeekerProfile:
-  return MaterialPageRoute(
-    builder: (_) => BlocProvider.value(
-      value: getIt<SignupCubit>(),
-      child: const ProfileScreen(),
-    ),
-  );
-
-  case Routes.EditProfileScreen: // 👈 ضيف الـ case بتاع EditProfile
+      case Routes.RoleSelectionScreen:
+        final args = setting.arguments as Map<String, dynamic>?;
+        final signupResponse = args?['signupResponse'];
+        return MaterialPageRoute(
+          builder: (_) => BlocProvider(
+            create: (context) => getIt<ServiceTypeCubit>(),
+            child: RoleSelectionScreen(signupResponse: signupResponse),
+          ),
+        );
+      case Routes.PhoneVerificationScreen:
+        final args = setting.arguments as Map<String, dynamic>?;
+        final email = args?['email'] as String? ?? '';
+        return MaterialPageRoute(
+          builder: (_) => PhoneVerificationScreen(email: email),
+        );
+      case Routes.ServiceSeekerProfile:
+        return MaterialPageRoute(
+          builder: (_) => BlocProvider.value(
+            value: getIt<signup.SignupCubit>(),
+            child: const ProfileScreen(),
+          ),
+        );
+      case Routes.EditProfileScreen:
         return MaterialPageRoute(
           builder: (_) => const EditProfileScreen(),
         );
-
       case Routes.ProviderProfileScreen:
         return MaterialPageRoute(
           builder: (_) => const ProviderProfileScreen(),
         );
-
-        case Routes.LocationPermissionScreen:
+      case Routes.LocationPermissionScreen:
         return MaterialPageRoute(
           builder: (_) =>  LocationPermissionScreen(),
         );
-
-        case Routes.LocationAddressScreen:
+      case Routes.LocationAddressScreen:
         return MaterialPageRoute(
           builder: (_) =>  LocationAddressScreen(),
         );
-
-        case Routes.DateTimeSelectionScreen:
+      case Routes.DateTimeSelectionScreen:
         return MaterialPageRoute(
           builder: (_) =>  DateTimeSelectionScreen(),
         );
-
-        case Routes.ReviewSummaryScreen:
+      case Routes.ReviewSummaryScreen:
         return MaterialPageRoute(
           builder: (_) =>  ReviewSummaryScreen(),
         );
-
-        case Routes.GalleryScreen:
+      case Routes.GalleryScreen:
         return MaterialPageRoute(
           builder: (_) =>  GalleryScreen(),
         );
-
-        case Routes.CallScreen:
+      case Routes.CallScreen:
         return MaterialPageRoute(
           builder: (_) => const CallScreen(),
         );
-        case Routes.BottomNavBar:
+      case Routes.BottomNavBar:
         return MaterialPageRoute(
           builder: (_) => const BottomNavBar(),
         );
-        case Routes.CityScreen:
+      case Routes.CityScreen:
         return MaterialPageRoute(
           builder: (_) => const CityScreen(),
         );
-        case Routes.OrderScreen:
-          return MaterialPageRoute(
-            builder: (_) => const OrderScreen(),
-          );
-        case Routes.PaymentMethodScreen:
-          return MaterialPageRoute(
-            builder: (_) => const PaymentMethodScreen(),
-          );
-        case Routes.NotificationScreen:
-          return MaterialPageRoute(
-            builder: (_) => const NotificationScreen(),
-          );
-        case Routes.HelpSupportScreen:
-          return MaterialPageRoute(
-            builder: (_) => const HelpSupportScreen(),
-          );
-        default:
+      case Routes.OrderScreen:
+        return MaterialPageRoute(
+          builder: (_) => const OrderScreen(),
+        );
+      case Routes.PaymentMethodScreen:
+        return MaterialPageRoute(
+          builder: (_) => const PaymentMethodScreen(),
+        );
+      case Routes.NotificationScreen:
+        return MaterialPageRoute(
+          builder: (_) => const NotificationScreen(),
+        );
+      case Routes.HelpSupportScreen:
+        return MaterialPageRoute(
+          builder: (_) => const HelpSupportScreen(),
+        );
+      default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(
             body: Center(

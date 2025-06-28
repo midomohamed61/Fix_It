@@ -2,13 +2,53 @@ import 'package:fix_it/core/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'cubit/service_type_cubit.dart';
+import 'package:fix_it/core/models/auth/signup_response.dart';
+import 'package:fix_it/core/repos/worker_repo.dart';
+import 'package:fix_it/core/repos/customer_repo.dart';
+import 'package:fix_it/core/models/worker/worker_data_request.dart';
+import 'package:fix_it/core/models/customer/customer_data_request.dart';
+import 'package:fix_it/core/di/di.dart';
+import 'package:fix_it/core/networking/api_result.dart';
+import 'package:fix_it/core/repos/signup_repo.dart';
+import 'package:fix_it/core/models/auth/signup_request_body.dart';
 
 class RoleSelectionScreen extends StatelessWidget {
-  const RoleSelectionScreen({super.key});
+  final SignupResponse signupResponse;
+  const RoleSelectionScreen({super.key, required this.signupResponse});
 
   @override
   Widget build(BuildContext context) {
     final cubit = context.read<ServiceTypeCubit>();
+    final workerRepo = getIt<WorkerRepo>();
+    final customerRepo = getIt<CustomerRepo>();
+
+    Future<void> handleNext(ServiceType type) async {
+      if (type == ServiceType.provider) {
+        final req = WorkerDataRequest(
+          workerId: signupResponse.id.toString(),
+          email: signupResponse.email,
+          name: signupResponse.name,
+          jobTitle: '',
+          address: '',
+          latitude: '',
+          longitude: '',
+          age: '',
+          about: '',
+          phoneNumber: '',
+          skills: '',
+        );
+        await workerRepo.updateWorkerData(req);
+      } else if (type == ServiceType.seeker) {
+        final req = CustomerDataRequest(
+          userId: signupResponse.id.toString(),
+          name: signupResponse.name,
+          phoneNumber: '',
+          age: '',
+        );
+        await customerRepo.updateCustomerData(req);
+      }
+      Navigator.pushNamed(context, '/PhoneVerificationScreen');
+    }
 
     return Scaffold(
       body: Padding(
@@ -62,7 +102,7 @@ class RoleSelectionScreen extends StatelessWidget {
                     onPressed: state.serviceType == ServiceType.none
                         ? null
                         : () {
-                            Navigator.pushNamed(context, '/PhoneVerificationScreen');
+                            handleNext(state.serviceType);
                           },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primaryColor,
@@ -76,6 +116,27 @@ class RoleSelectionScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class SignupCubit extends Cubit<void> {
+  final SignupRepo signupRepo;
+  SignupCubit(this.signupRepo) : super(null);
+
+  Future<ApiResult<SignupResponse>> signup({
+    required String email,
+    required String name,
+    required String password,
+    required String role,
+  }) async {
+    return await signupRepo.signup(
+      SignupRequestBody(
+        email: email,
+        name: name,
+        password: password,
+        role: role,
       ),
     );
   }

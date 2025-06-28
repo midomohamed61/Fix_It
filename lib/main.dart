@@ -9,6 +9,11 @@ import 'featuers/order/order_screen.dart';
 import 'package:fix_it/core/themes/app_colors.dart';
 import 'featuers/home/HomeScreen.dart';
 import 'featuers/payment/payment_method_screen.dart';
+import 'package:fix_it/featuers/auth/signin/signinScreen.dart';
+import 'package:fix_it/core/routing/routes.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'featuers/home/cubit/workers_cubit.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,7 +33,10 @@ class _MainScreenState extends State<MainScreen> {
 
   final List<Widget> _screens = [
     // يمكنك استبدال Container() بشاشتك الرئيسية لاحقًا
-     HomeScreen(),
+    BlocProvider(
+      create: (_) => WorkersCubit(),
+      child: HomeScreen(),
+    ),
     CityScreen(),
     OrderScreen(),
     ProfileScreen(),
@@ -55,8 +63,7 @@ class MyApp extends StatelessWidget {
       builder: (context, child) => MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Fix It',
-        home: const MainScreen(),
-        // initialRoute: Routes.BottomNavBar, // لم تعد ضرورية
+        initialRoute: Routes.SigninScreen,
         onGenerateRoute: AppRouter().generateRoute,
       ),
     );

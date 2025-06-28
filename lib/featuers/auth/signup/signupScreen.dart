@@ -10,6 +10,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:fix_it/featuers/auth/account/role_selection _screen.dart' as role;
+import 'package:fix_it/featuers/auth/account/phone_verification_screen.dart';
+import 'package:fix_it/featuers/auth/account/cubit/service_type_cubit.dart';
+import 'package:fix_it/core/di/di.dart';
 
 class SignUpScreen extends StatelessWidget {
   const SignUpScreen({super.key});
@@ -83,7 +87,19 @@ class SignUpScreen extends StatelessWidget {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Signup Successful!')),
                       );
-                      Navigator.pushNamed(context, '/RoleSelectionScreen');
+                      Future.delayed(Duration.zero, () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => BlocProvider(
+                              create: (context) => getIt<ServiceTypeCubit>(),
+                              child: role.RoleSelectionScreen(
+                                signupResponse: state.data,
+                              ),
+                            ),
+                          ),
+                        );
+                      });
                     } else if (state is SignupError) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text(state.error)),

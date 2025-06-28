@@ -10,6 +10,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:fix_it/featuers/BottomNavBar.dart';
 
 class SignInScreen extends StatelessWidget {
   const SignInScreen({super.key});
@@ -57,7 +58,10 @@ class SignInScreen extends StatelessWidget {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Login Successful!')),
                       );
-                      Navigator.pushReplacementNamed(context, '/RoleSelectionScreen');
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (_) => BottomNavBar()),
+                      );
                     } else if (state is Error) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text(state.error)),
