@@ -2,17 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:fix_it/core/themes/app_colors.dart';
 import 'filter_screen.dart';
 import 'popular_services_screen.dart';
-import 'package:fix_it/core/models/worker/worker_response.dart';
-import 'package:fix_it/core/di/di.dart';
-import 'package:fix_it/core/repos/customer_repo.dart';
-import 'package:fix_it/core/helpers/shared_pref_helper.dart';
-import 'package:fix_it/core/helpers/constants.dart';
-import 'package:fix_it/core/networking/api_result.dart';
-import 'package:fix_it/core/networking/dio_factory.dart';
-import 'package:dio/dio.dart';
 import 'all_workers_screen.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'cubit/workers_cubit.dart';
+import 'worker_profile_screen.dart';
+
+// تعريف كلاس وهمي للعمال
+class FakeWorker {
+  final String name;
+  final String jobTitle;
+  final double rate;
+  final String imageUrl;
+  final double price; // السعر بالساعة
+  final String availability; // المواعيد المتاحة
+  FakeWorker({
+    required this.name, 
+    required this.jobTitle, 
+    required this.rate, 
+    required this.imageUrl,
+    required this.price,
+    required this.availability,
+  });
+}
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -31,8 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // اطلب تحميل العمال عند بناء الصفحة
-    Future.microtask(() => context.read<WorkersCubit>().fetchWorkers());
+    // لا داعي لأي Bloc هنا
   }
 
   @override
@@ -48,65 +56,6 @@ class _HomeScreenState extends State<HomeScreen> {
       {'icon': Icons.electrical_services, 'label': 'Electric work'},
       {'icon': Icons.solar_power, 'label': 'Solar'},
     ];
-  }
-
-  // Helper to get all job titles from loaded providers
-  List<String> _getAllJobsFromProviders(List<WorkerResponse> workers) {
-    return workers.map((w) => w.jobTitle).toSet().toList();
-  }
-
-  // فلترة العاملين (تعمل الآن مع WorkerResponse)
-  List<WorkerResponse> filterWorkers(List<WorkerResponse> workers, String query) {
-    var filtered = workers;
-    if (_selectedJob != null && _selectedJob!.isNotEmpty) {
-      filtered = filtered.where((w) => w.jobTitle == _selectedJob).toList();
-    }
-    if (query.isEmpty) return filtered;
-    final lowercaseQuery = query.toLowerCase().trim();
-    return filtered.where((worker) {
-      final nameMatch = worker.name.toLowerCase().contains(lowercaseQuery);
-      final jobMatch = worker.jobTitle.toLowerCase().contains(lowercaseQuery);
-      return nameMatch || jobMatch;
-    }).toList();
-  }
-
-  // اقتراحات البحث (تعمل الآن مع WorkerResponse)
-  void generateSearchSuggestions(List<WorkerResponse> workers) {
-    if (_searchQuery.isEmpty) {
-      _searchSuggestions = [];
-      return;
-    }
-    final suggestions = <String>{};
-    final lowercaseQuery = _searchQuery.toLowerCase();
-    for (final worker in workers) {
-      if (worker.name.toLowerCase().contains(lowercaseQuery)) {
-        suggestions.add(worker.name);
-      }
-      if (worker.jobTitle.toLowerCase().contains(lowercaseQuery)) {
-        suggestions.add(worker.jobTitle);
-      }
-    }
-    final commonJobs = [
-      'Plumber', 'Electrician', 'Carpenter', 'Painter', 'Cleaner',
-      'Gardener', 'Mechanic', 'Technician', 'Engineer', 'Designer'
-    ];
-    for (final job in commonJobs) {
-      if (job.toLowerCase().contains(lowercaseQuery)) {
-        suggestions.add(job);
-      }
-    }
-    setState(() {
-      _searchSuggestions = suggestions.take(8).toList();
-    });
-  }
-
-  // تطبيق اقتراح البحث
-  void applySuggestion(String suggestion) {
-    _searchController.text = suggestion;
-    setState(() {
-      _searchQuery = suggestion;
-      _showSuggestions = false;
-    });
   }
 
   Map<String, List<Map<String, dynamic>>> getPopularServicesCategories() {
@@ -164,389 +113,387 @@ class _HomeScreenState extends State<HomeScreen> {
     return bgColors[i % bgColors.length];
   }
 
-  // جلب مزودي الخدمة من الـ API
-  Future<List<WorkerResponse>> fetchServiceProviders() async {
-    try {
-      final token = await SharedPrefHelper.getString(SharedPrefKeys.userToken);
-      if (token != null && token.isNotEmpty) {
-        DioFactory.setTokenIntoHeaderAfterLogin(token);
-      }
-      final customerRepo = getIt<CustomerRepo>();
-      final result = await customerRepo.findWorkers();
-      if (result is Success<List<WorkerResponse>>) {
-        return result.data;
-      } else {
-        return [];
-      }
-    } catch (e) {
-      return [];
-    }
+  // قائمة عمال وهميين
+  List<FakeWorker> getFakeWorkers() {
+    final List<String> names = [
+      'Jackson', 'Logan', 'Ethan Ilta', 'Isabella Una', 'Panama', 'Jamalo', 'Meharn', 'Shatem',
+      'Liam', 'Olivia', 'Noah', 'Emma', 'Ava', 'Mason', 'Sophia'
+    ];
+    final List<String> jobs = [
+      'Electrician', 'Plumber', 'Carpenter', 'Painter', 'Cleaner', 'Technician', 'Mechanic', 'Designer',
+      'Electrician', 'Plumber', 'Carpenter', 'Painter', 'Cleaner', 'Technician', 'Mechanic'
+    ];
+    final List<double> rates = [4.9, 5.0, 4.4, 4.3, 4.9, 4.7, 4.8, 4.5, 4.6, 4.2, 4.1, 4.0, 4.3, 4.7, 4.8];
+    final List<double> prices = [75.0, 80.0, 65.0, 70.0, 60.0, 85.0, 90.0, 55.0, 75.0, 70.0, 65.0, 80.0, 85.0, 90.0, 75.0];
+    final List<String> availability = [
+      '9:00 AM - 6:00 PM', '8:00 AM - 5:00 PM', '10:00 AM - 7:00 PM', '9:00 AM - 6:00 PM',
+      '8:00 AM - 5:00 PM', '10:00 AM - 7:00 PM', '9:00 AM - 6:00 PM', '8:00 AM - 5:00 PM',
+      '10:00 AM - 7:00 PM', '9:00 AM - 6:00 PM', '8:00 AM - 5:00 PM', '10:00 AM - 7:00 PM',
+      '9:00 AM - 6:00 PM', '8:00 AM - 5:00 PM', '10:00 AM - 7:00 PM'
+    ];
+    
+    // استخدام الصور الموجودة فقط مع تكرارها
+    final List<String> availableImages = [
+      'assets/images/worker1.png',
+      'assets/images/worker2.png', 
+      'assets/images/worke3.png',
+    ];
+    
+    return List.generate(15, (i) => FakeWorker(
+      name: names[i],
+      jobTitle: jobs[i],
+      rate: rates[i],
+      imageUrl: availableImages[i % availableImages.length], // تكرار الصور المتاحة
+      price: prices[i],
+      availability: availability[i],
+    ));
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: BlocProvider.of<WorkersCubit>(context),
-      child: Scaffold(
+    return Scaffold(
+      backgroundColor: AppColors.backgroundColor,
+      appBar: AppBar(
         backgroundColor: AppColors.backgroundColor,
-        appBar: AppBar(
-          backgroundColor: AppColors.backgroundColor,
-          elevation: 0,
-          title: Image.asset('assets/images/Frame.png', height: 32),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.phone, color: AppColors.primaryColor),
-              onPressed: () {},
+        elevation: 0,
+        title: Image.asset('assets/images/Frame.png', height: 32),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.phone, color: AppColors.primaryColor),
+            onPressed: () {},
+          ),
+        ],
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          // Banner
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1566C2),
+              borderRadius: BorderRadius.circular(16),
             ),
-          ],
-        ),
-        body: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            // Banner
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1566C2),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Row(
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      Text(
+                        "Get 30% off",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        "Just by Booking Home Services",
+                        style: TextStyle(color: Colors.white, fontSize: 14),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          // Search with suggestions
+          Column(
+            children: [
+              Row(
                 children: [
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text(
-                          "Get 30% off",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
+                    child: TextField(
+                      controller: _searchController,
+                      onChanged: (value) {
+                        setState(() {
+                          _searchQuery = value;
+                          _showSuggestions = value.isNotEmpty;
+                        });
+                      },
+                      onTap: () {
+                        if (_searchQuery.isNotEmpty) {
+                          setState(() {
+                            _showSuggestions = true;
+                          });
+                        }
+                      },
+                      decoration: InputDecoration(
+                        hintText: "Search here..",
+                        prefixIcon: const Icon(Icons.search),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide.none,
+                        ),
+                        filled: true,
+                        fillColor: Colors.white,
+                        contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 8),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  InkWell(
+                    onTap: () async {
+                      final selectedJob = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => FilterScreen(
+                            availableJobs: ['Electrician', 'Plumber', 'Carpenter', 'Painter', 'Cleaner', 'Technician', 'Mechanic', 'Designer'],
+                            selectedJob: _selectedJob,
                           ),
                         ),
-                        SizedBox(height: 8),
-                        Text(
-                          "Just by Booking Home Services",
-                          style: TextStyle(color: Colors.white, fontSize: 14),
-                        ),
-                      ],
+                      );
+                      if (selectedJob != null) {
+                        setState(() {
+                          _selectedJob = selectedJob;
+                        });
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.tune, color: AppColors.primaryColor),
                     ),
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: 16),
-            // Search with suggestions
-            Column(
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _searchController,
-                        onChanged: (value) {
-                          setState(() {
-                            _searchQuery = value;
-                            _showSuggestions = value.isNotEmpty;
-                          });
-                          final workers = (context.read<WorkersCubit>().state is WorkersLoaded)
-                              ? (context.read<WorkersCubit>().state as WorkersLoaded).workers
-                              : <WorkerResponse>[];
-                          generateSearchSuggestions(workers);
-                        },
-                        onTap: () {
-                          if (_searchQuery.isNotEmpty) {
-                            setState(() {
-                              _showSuggestions = true;
-                            });
-                          }
-                        },
-                        decoration: InputDecoration(
-                          hintText: "Search here..",
-                          prefixIcon: const Icon(Icons.search),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide.none,
-                          ),
-                          filled: true,
-                          fillColor: Colors.white,
-                          contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 8),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    InkWell(
-                      onTap: () async {
-                        final workers = (context.read<WorkersCubit>().state is WorkersLoaded)
-                            ? (context.read<WorkersCubit>().state as WorkersLoaded).workers
-                            : <WorkerResponse>[];
-                        final selectedJob = await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => FilterScreen(
-                              availableJobs: _getAllJobsFromProviders(workers),
-                              selectedJob: _selectedJob,
-                            ),
-                          ),
-                        );
-                        if (selectedJob != null) {
-                          setState(() {
-                            _selectedJob = selectedJob;
-                          });
-                        }
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(Icons.tune, color: AppColors.primaryColor),
-                      ),
-                    ),
-                  ],
-                ),
-                
-                // Search suggestions
-                if (_showSuggestions && _searchSuggestions.isNotEmpty)
-                  Container(
-                    margin: const EdgeInsets.only(top: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: _searchSuggestions.length,
-                      itemBuilder: (context, index) {
-                        final suggestion = _searchSuggestions[index];
-                        return ListTile(
-                          dense: true,
-                          leading: const Icon(Icons.search, size: 16, color: Colors.grey),
-                          title: Text(
-                            suggestion,
-                            style: const TextStyle(fontSize: 14),
-                          ),
-                          onTap: () => applySuggestion(suggestion),
-                        );
-                      },
-                    ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            // Popular Services
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text("Popular Services", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => PopularServicesScreen(
-                          categories: getPopularServicesCategories(),
-                        ),
-                      ),
-                    );
-                  },
-                  child: const Text("View all", style: TextStyle(color: Colors.blue)),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            // Horizontal row for popular services
-            SizedBox(
-              height: 90,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: getAllPopularServicesFlat().length,
-                separatorBuilder: (_, __) => const SizedBox(width: 24),
-                itemBuilder: (context, i) {
-                  final service = getAllPopularServicesFlat()[i];
-                  return Column(
-                    children: [
-                      CircleAvatar(
-                        radius: 28,
-                        backgroundColor: Colors.blue[50],
-                        child: Icon(service['icon'], color: Colors.blue, size: 32),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        service['label'],
-                        style: const TextStyle(fontSize: 13, color: Colors.black, fontWeight: FontWeight.w400),
+              
+              // Search suggestions
+              if (_showSuggestions && _searchSuggestions.isNotEmpty)
+                Container(
+                  margin: const EdgeInsets.only(top: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
                       ),
                     ],
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 24),
-            // Service Providers
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text("Service Providers", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                    BlocBuilder<WorkersCubit, WorkersState>(
-                      builder: (context, state) {
-                        List<WorkerResponse> workers = [];
-                        if (state is WorkersLoaded) workers = state.workers;
-                        final filtered = filterWorkers(workers, _searchQuery);
-                        return Row(
-                          children: [
-                            Text(
-                              '${filtered.length} workers available',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                            if (_searchQuery.isNotEmpty) ...[
-                              const SizedBox(width: 8),
-                              Text(
-                                'for "$_searchQuery"',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.primaryColor,
-                                  fontStyle: FontStyle.italic,
-                                ),
-                              ),
-                            ],
-                          ],
-                        );
-                      },
-                    ),
-                  ],
-                ),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const AllWorkersScreen(),
-                      ),
-                    );
-                  },
-                  child: const Text("View all", style: TextStyle(color: AppColors.primaryColor)),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            // Workers Grid
-            BlocBuilder<WorkersCubit, WorkersState>(
-              builder: (context, state) {
-                if (state is WorkersLoading) {
-                  return Container(
-                    height: 180,
-                    child: Center(child: CircularProgressIndicator()),
-                  );
-                }
-                if (state is WorkersError) {
-                  return Container(
-                    height: 120,
-                    child: Center(child: Text(state.message)),
-                  );
-                }
-                if (state is WorkersLoaded) {
-                  final filteredProviders = filterWorkers(state.workers, _searchQuery);
-                  if (filteredProviders.isEmpty && _searchQuery.isNotEmpty) {
-                    return Container(
-                      height: 120,
-                      child: Center(child: Text('No workers found for "$_searchQuery"')),
-                    );
-                  }
-                  return GridView.builder(
+                  ),
+                  child: ListView.builder(
                     shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 12,
-                      crossAxisSpacing: 12,
-                      childAspectRatio: 0.75,
-                    ),
-                    itemCount: filteredProviders.length,
-                    itemBuilder: (context, i) {
-                      final p = filteredProviders[i];
-                      final bgColor = getWorkerCardColor(i);
-                      return Container(
-                        decoration: BoxDecoration(
-                          color: bgColor,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            CircleAvatar(
-                              radius: 32,
-                              backgroundColor: Colors.white,
-                              backgroundImage: (p.imageUrl != null && p.imageUrl!.isNotEmpty)
-                                  ? NetworkImage(p.imageUrl!)
-                                  : null,
-                              child: (p.imageUrl == null || p.imageUrl!.isEmpty)
-                                  ? Icon(Icons.person, size: 36, color: Colors.grey[400])
-                                  : null,
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              p.name,
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                              textAlign: TextAlign.center,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              p.jobTitle,
-                              style: const TextStyle(fontSize: 13, color: Colors.black54),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.star, color: Colors.amber, size: 16),
-                                const SizedBox(width: 4),
-                                Text(
-                                  (p.rate?.toStringAsFixed(1) ?? '0.0'),
-                                  style: const TextStyle(fontSize: 12, color: Colors.black87),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            ElevatedButton(
-                              onPressed: () {
-                                // تفاصيل العامل
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blue,
-                                minimumSize: const Size(80, 32),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                              ),
-                              child: const Text("Details", style: TextStyle(fontSize: 13)),
-                            ),
-                          ],
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: _searchSuggestions.length,
+                    itemBuilder: (context, index) {
+                      final suggestion = _searchSuggestions[index];
+                      return ListTile(
+                        dense: true,
+                        leading: const Icon(Icons.search, size: 16, color: Colors.grey),
+                        title: Text(
+                          suggestion,
+                          style: const TextStyle(fontSize: 14),
                         ),
                       );
                     },
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          // Popular Services
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text("Popular Services", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => PopularServicesScreen(
+                        categories: getPopularServicesCategories(),
+                      ),
+                    ),
                   );
-                }
-                return SizedBox.shrink();
+                },
+                child: const Text("View all", style: TextStyle(color: Colors.blue)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          // Horizontal row for popular services
+          SizedBox(
+            height: 90,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: getAllPopularServicesFlat().length,
+              separatorBuilder: (_, __) => const SizedBox(width: 24),
+              itemBuilder: (context, i) {
+                final service = getAllPopularServicesFlat()[i];
+                return Column(
+                  children: [
+                    CircleAvatar(
+                      radius: 28,
+                      backgroundColor: Colors.blue[50],
+                      child: Icon(service['icon'], color: Colors.blue, size: 32),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      service['label'],
+                      style: const TextStyle(fontSize: 13, color: Colors.black, fontWeight: FontWeight.w400),
+                    ),
+                  ],
+                );
               },
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 24),
+          // Service Providers
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text("Service Providers", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  Row(
+                    children: [
+                      Text(
+                        '15 workers available',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                      if (_searchQuery.isNotEmpty) ...[
+                        const SizedBox(width: 8),
+                        Text(
+                          'for "$_searchQuery"',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.primaryColor,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
+              ),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const AllWorkersScreen(),
+                    ),
+                  );
+                },
+                child: const Text("View all", style: TextStyle(color: AppColors.primaryColor)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          // Workers Grid
+          GridView.builder(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisSpacing: 12,
+              crossAxisSpacing: 12,
+              childAspectRatio: 0.75,
+            ),
+            itemCount: getFakeWorkers().length,
+            itemBuilder: (context, i) {
+              final p = getFakeWorkers()[i];
+              final bgColor = getWorkerCardColor(i);
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => WorkerProfileScreen(
+                        name: p.name,
+                        jobTitle: p.jobTitle,
+                        rate: p.rate,
+                        imageUrl: i < 4 ? p.imageUrl : null,
+                        price: p.price,
+                        availability: p.availability,
+                      ),
+                    ),
+                  );
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: bgColor,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 70,
+                        height: 70,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        child: ClipOval(
+                          child: Image.asset(
+                            p.imageUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) => Icon(Icons.person, size: 36, color: Colors.grey[400]),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        p.name,
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        p.jobTitle,
+                        style: const TextStyle(fontSize: 13, color: Colors.black54),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.star, color: Colors.amber, size: 16),
+                          const SizedBox(width: 4),
+                          Text(
+                            p.rate.toStringAsFixed(1),
+                            style: const TextStyle(fontSize: 12, color: Colors.black87),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '\$${p.price.toStringAsFixed(0)}/hour',
+                        style: const TextStyle(fontSize: 11, color: Colors.green, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      ElevatedButton(
+                        onPressed: () {},
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          minimumSize: const Size(80, 32),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                        child: const Text("Details", style: TextStyle(fontSize: 13)),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
     );
   }

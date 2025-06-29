@@ -3,9 +3,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:fix_it/featuers/profile/home/Provider profile/Location Address/location_address_screen.dart';
 
 class LocationPermissionScreen extends StatefulWidget {
-  const LocationPermissionScreen({super.key});
+  final String name;
+  final String jobTitle;
+  final double rate;
+  final String? imageUrl;
+  final double price; // السعر بالساعة
+  final String availability; // المواعيد المتاحة
+  const LocationPermissionScreen({
+    super.key, 
+    required this.name, 
+    required this.jobTitle, 
+    required this.rate, 
+    this.imageUrl,
+    required this.price,
+    required this.availability,
+  });
 
   @override
   _LocationPermissionScreenState createState() => _LocationPermissionScreenState();
@@ -111,10 +126,19 @@ class _LocationPermissionScreenState extends State<LocationPermissionScreen> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Fill manually selected')),
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => LocationAddressScreen(
+                        name: widget.name,
+                        jobTitle: widget.jobTitle,
+                        rate: widget.rate,
+                        imageUrl: widget.imageUrl,
+                        price: widget.price,
+                        availability: widget.availability,
+                      ),
+                    ),
                   );
-                  Navigator.pushReplacementNamed(context, '/LocationAddressScreen');
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryColor,

@@ -1,8 +1,24 @@
 import 'package:fix_it/core/themes/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:fix_it/featuers/profile/home/Provider profile/Date Time Selection/date_time_selection_screen.dart';
+import 'package:fix_it/featuers/profile/home/Provider profile/Service Offer/service_offer_screen.dart';
 
 class LocationAddressScreen extends StatefulWidget {
-  const LocationAddressScreen({Key? key}) : super(key: key);
+  final String name;
+  final String jobTitle;
+  final double rate;
+  final String? imageUrl;
+  final double price; // السعر بالساعة
+  final String availability; // المواعيد المتاحة
+  const LocationAddressScreen({
+    super.key, 
+    required this.name, 
+    required this.jobTitle, 
+    required this.rate, 
+    this.imageUrl,
+    required this.price,
+    required this.availability,
+  });
 
   @override
   State<LocationAddressScreen> createState() => _LocationAddressScreenState();
@@ -69,8 +85,21 @@ class _LocationAddressScreenState extends State<LocationAddressScreen> {
               height: 48,
               child: ElevatedButton(
                 onPressed: () {
-                  // هنا يمكنك إرسال البيانات أو الانتقال للخطوة التالية
-                  Navigator.pushReplacementNamed(context, '/BottomNavBar');
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ServiceOfferScreen(
+                        name: widget.name,
+                        jobTitle: widget.jobTitle,
+                        rate: widget.rate,
+                        imageUrl: widget.imageUrl,
+                        price: widget.price,
+                        availability: widget.availability,
+                        businessName: businessNameController.text,
+                        businessAddress: businessAddressController.text,
+                      ),
+                    ),
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF1566C2),

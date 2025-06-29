@@ -32,7 +32,7 @@ class GalleryScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8.0),
                 image: DecorationImage(
-                  image: AssetImage('assets/images/image 84.png'), // استبدل بمسار الصورة الفعلي
+                  image: AssetImage('assets/images/worker2.png'), // استبدل بمسار الصورة الفعلي
                   fit: BoxFit.cover,
                 ),
               ),

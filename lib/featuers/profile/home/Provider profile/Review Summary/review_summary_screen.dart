@@ -3,7 +3,27 @@ import 'package:fix_it/core/themes/app_colors.dart';
 import 'package:fix_it/core/helpers/shared_pref_helper.dart';
 
 class ReviewSummaryScreen extends StatelessWidget {
-  const ReviewSummaryScreen({super.key});
+  final String name;
+  final String jobTitle;
+  final double rate;
+  final String? imageUrl;
+  final String address;
+  final String date;
+  final String time;
+  final double price; // السعر بالساعة
+  final String availability; // المواعيد المتاحة
+  const ReviewSummaryScreen({
+    super.key, 
+    required this.name, 
+    required this.jobTitle, 
+    required this.rate, 
+    this.imageUrl, 
+    required this.address, 
+    required this.date, 
+    required this.time,
+    required this.price,
+    required this.availability,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -15,80 +35,76 @@ class ReviewSummaryScreen extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: FutureBuilder(
-          future: _loadData(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            if (snapshot.hasError) {
-              return Center(child: Text("Error: ${snapshot.error}"));
-            }
-
-            final data = snapshot.data as Map<String, String>;
-
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Worker Info
+            Row(
               children: [
-                // Worker Info
-                Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 40,
-                      backgroundImage: AssetImage('assets/images/Rectangle 2117.png'), // Replace with actual image
-                    ),
-                    const SizedBox(width: 16),
-                    const Text(
-                      'Emily Jani',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.textColor),
-                    ),
-                  ],
+                CircleAvatar(
+                  radius: 40,
+                  backgroundImage: imageUrl != null ? AssetImage(imageUrl!) : null,
+                  child: imageUrl == null ? Icon(Icons.person, size: 40) : null,
                 ),
-                const SizedBox(height: 16),
-                // Service Info
-                _buildInfoRow('Type', 'Plumber'),
-                _buildInfoRow('Price', '\$20/H'),
-                _buildInfoRow('Material', 'Not Included'),
-                _buildInfoRow('Traveling', 'Free'),
-                const SizedBox(height: 24),
-                // Address Info
-                const Text(
-                  'Address',
-                  style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textColor),
-                ),
-                const SizedBox(height: 8),
+                const SizedBox(width: 16),
                 Text(
-                  '${data['house_number']}, ${data['street_number']}, ${data['complete_address']}',
-                  style: TextStyle(color: AppColors.textColor),
-                ),
-                const SizedBox(height: 16),
-                // Booking Info
-                _buildInfoRow('Booking Date', data['selected_date'] ?? 'N/A'),
-                _buildInfoRow('Booking Hours', data['selected_time'] ?? 'N/A'),
-                const SizedBox(height: 16),
-                // Total Info
-                _buildInfoRow('Total', '\$20/H'),
-                const SizedBox(height: 32),
-                // Confirm Button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      _showConfirmationDialog(context);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryColor,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      textStyle: const TextStyle(fontSize: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                    child: const Text('Confirm', style: TextStyle(color: AppColors.backgroundColor)),
-                  ),
+                  name,
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.textColor),
                 ),
               ],
-            );
-          },
+            ),
+            const SizedBox(height: 16),
+            // Service Info
+            _buildInfoRow('Type', jobTitle),
+            _buildInfoRow('Price', '\$${price.toStringAsFixed(0)}/H'),
+            _buildInfoRow('Material', 'Not Included'),
+            _buildInfoRow('Traveling', 'Free'),
+            const SizedBox(height: 24),
+            // Address Info
+            const Text(
+              'Address',
+              style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textColor),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              address,
+              style: TextStyle(color: AppColors.textColor),
+            ),
+            const SizedBox(height: 16),
+            // Booking Info
+            _buildInfoRow('Booking Date', date),
+            _buildInfoRow('Booking Hours', time),
+            _buildInfoRow('Availability', availability),
+            const SizedBox(height: 16),
+            // Total Info
+            _buildInfoRow('Total', '\$${price.toStringAsFixed(0)}/H'),
+            const SizedBox(height: 32),
+            // Confirm Button
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  FakeOrderStore.paidOrders.add(FakeOrder(
+                    service: jobTitle,
+                    amount: '\$${price.toStringAsFixed(0)}',
+                    date: date,
+                    name: name,
+                  ));
+                  Navigator.pushReplacementNamed(context, '/PaidOrdersScreen');
+                  Future.delayed(const Duration(milliseconds: 300), () {
+                    _showConfirmationDialog(context);
+                  });
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryColor,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  textStyle: const TextStyle(fontSize: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                child: const Text('Confirm', style: TextStyle(color: AppColors.backgroundColor)),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -105,22 +121,6 @@ class ReviewSummaryScreen extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  Future<Map<String, String>> _loadData() async {
-    final houseNumber = await SharedPrefHelper.getString('house_number');
-    final streetNumber = await SharedPrefHelper.getString('street_number');
-    final completeAddress = await SharedPrefHelper.getString('complete_address');
-    final selectedDate = await SharedPrefHelper.getString('selected_date');
-    final selectedTime = await SharedPrefHelper.getString('selected_time');
-
-    return {
-      'house_number': houseNumber,
-      'street_number': streetNumber,
-      'complete_address': completeAddress,
-      'selected_date': selectedDate,
-      'selected_time': selectedTime,
-    };
   }
 
   void _showConfirmationDialog(BuildContext context) {
@@ -146,7 +146,7 @@ class ReviewSummaryScreen extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.pushReplacementNamed(context, '/Home'); // Replace with your home route
+                Navigator.pushReplacementNamed(context, '/BottomNavBar');
               },
               child: const Text('Home', style: TextStyle(color: AppColors.primaryColor)),
             ),
@@ -155,6 +155,18 @@ class ReviewSummaryScreen extends StatelessWidget {
       },
     );
   }
+}
+
+class FakeOrder {
+  final String service;
+  final String amount;
+  final String date;
+  final String name;
+  FakeOrder({required this.service, required this.amount, required this.date, required this.name});
+}
+
+class FakeOrderStore {
+  static List<FakeOrder> paidOrders = [];
 }
 
 

@@ -11,8 +11,7 @@ import 'featuers/home/HomeScreen.dart';
 import 'featuers/payment/payment_method_screen.dart';
 import 'package:fix_it/featuers/auth/signin/signinScreen.dart';
 import 'package:fix_it/core/routing/routes.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'featuers/home/cubit/workers_cubit.dart';
+import 'featuers/splash/splash_screen.dart';
 
 
 void main() async {
@@ -33,10 +32,7 @@ class _MainScreenState extends State<MainScreen> {
 
   final List<Widget> _screens = [
     // يمكنك استبدال Container() بشاشتك الرئيسية لاحقًا
-    BlocProvider(
-      create: (_) => WorkersCubit(),
-      child: HomeScreen(),
-    ),
+    HomeScreen(),
     CityScreen(),
     OrderScreen(),
     ProfileScreen(),
@@ -63,7 +59,7 @@ class MyApp extends StatelessWidget {
       builder: (context, child) => MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Fix It',
-        initialRoute: Routes.SigninScreen,
+        initialRoute: Routes.SplashScreen,
         onGenerateRoute: AppRouter().generateRoute,
       ),
     );

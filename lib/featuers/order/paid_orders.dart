@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:fix_it/core/themes/app_colors.dart';
+import '../profile/home/Provider profile/Review Summary/review_summary_screen.dart';
 
 class PaidOrdersScreen extends StatelessWidget {
   const PaidOrdersScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final orders = FakeOrderStore.paidOrders;
     return SafeArea(
       child: SingleChildScrollView(
         padding: const EdgeInsets.only(bottom: 24, top: 8),
@@ -16,22 +18,9 @@ class PaidOrdersScreen extends StatelessWidget {
             children: [
               const Text('Paid services', style: TextStyle(fontSize: 14)),
               const SizedBox(height: 16),
-              ...[
-                {
-                  'icon': '🧑‍🔧',
-                  'service': 'Plumbing',
-                  'amount': '\u0000300.00',
-                  'date': 'December 24, 2023',
-                  'name': 'Emily jani',
-                },
-                {
-                  'icon': '🧑‍🎨',
-                  'service': 'Painter',
-                  'amount': '\u0000600.00',
-                  'date': 'December 07, 2023',
-                  'name': 'Lucas',
-                },
-              ].map((order) => Card(
+              if (orders.isEmpty)
+                const Center(child: Text('No paid orders yet.'))
+              else ...orders.map((order) => Card(
                 elevation: 2,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 color: AppColors.backgroundColor,
@@ -42,9 +31,9 @@ class PaidOrdersScreen extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          Text(order['icon']!, style: const TextStyle(fontSize: 20)),
+                          const Icon(Icons.home_repair_service, color: AppColors.primaryColor, size: 20),
                           const SizedBox(width: 8),
-                          Text(order['service']!, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                          Text(order.service, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                         ],
                       ),
                       const SizedBox(height: 12),
@@ -52,7 +41,7 @@ class PaidOrdersScreen extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text('Amount to paid', style: TextStyle(fontSize: 14)),
-                          Text(order['amount']!, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppColors.primaryColor)),
+                          Text(order.amount, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppColors.primaryColor)),
                         ],
                       ),
                       const SizedBox(height: 8),
@@ -60,15 +49,15 @@ class PaidOrdersScreen extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text('Booking date', style: TextStyle(fontSize: 14)),
-                          Text(order['date']!, style: const TextStyle(fontSize: 14)),
+                          Text(order.date, style: const TextStyle(fontSize: 14)),
                         ],
                       ),
                       const SizedBox(height: 8),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text('Plumber name', style: TextStyle(fontSize: 14)),
-                          Text(order['name']!, style: const TextStyle(fontSize: 14, color: AppColors.primaryColor)),
+                          const Text('Provider name', style: TextStyle(fontSize: 14)),
+                          Text(order.name, style: const TextStyle(fontSize: 14, color: AppColors.primaryColor)),
                         ],
                       ),
                     ],

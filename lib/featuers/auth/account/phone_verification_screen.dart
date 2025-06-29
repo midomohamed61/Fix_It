@@ -6,6 +6,9 @@ import 'package:fix_it/featuers/auth/signup/cubit/cubit/signup_cubit.dart';
 import 'package:fix_it/core/networking/api_result.dart';
 import 'dart:async';
 import 'package:fix_it/featuers/city/CityScreen.dart';
+import 'package:fix_it/featuers/profile/home/Provider profile/Location Address/location_address_screen.dart';
+import 'package:fix_it/featuers/BottomNavBar.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PhoneVerificationScreen extends StatefulWidget {
   final String email;
@@ -54,8 +57,38 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
     setState(() => _isLoading = false);
     print('Activation result: $result');
     if (result is Success) {
-      print('Activation success, navigating to LocationAddressScreen');
-      Navigator.pushReplacementNamed(context, '/LocationAddressScreen');
+      print('Activation success, checking user role');
+      
+      // Check the saved user role
+      final prefs = await SharedPreferences.getInstance();
+      final userRole = prefs.getString('user_role') ?? 'customer';
+      
+      if (userRole == 'worker') {
+        // For workers, continue to location address screen
+        print('User is worker, navigating to LocationAddressScreen');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => LocationAddressScreen(
+              name: 'Jackson',
+              jobTitle: 'Electrician',
+              rate: 4.9,
+              imageUrl: 'assets/images/worker1.png',
+              price: 75.0,
+              availability: '9:00 AM - 6:00 PM',
+            ),
+          ),
+        );
+      } else {
+        // For customers, go directly to bottom nav bar
+        print('User is customer, navigating to BottomNavBar');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const BottomNavBar(),
+          ),
+        );
+      }
     } else if (result is Failure) {
       print('Activation failed: ${(result as Failure).errorHandler.message}');
       ScaffoldMessenger.of(context).showSnackBar(

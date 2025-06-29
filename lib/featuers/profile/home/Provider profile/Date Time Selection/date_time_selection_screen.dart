@@ -2,9 +2,26 @@ import 'package:fix_it/core/helpers/shared_pref_helper.dart';
 import 'package:fix_it/core/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
+import 'package:fix_it/featuers/profile/home/Provider profile/Review Summary/review_summary_screen.dart';
 
 class DateTimeSelectionScreen extends StatefulWidget {
-  const DateTimeSelectionScreen({super.key});
+  final String name;
+  final String jobTitle;
+  final double rate;
+  final String? imageUrl;
+  final String address;
+  final double price;
+  final String availability;
+  const DateTimeSelectionScreen({
+    super.key, 
+    required this.name, 
+    required this.jobTitle, 
+    required this.rate, 
+    this.imageUrl, 
+    required this.address,
+    required this.price,
+    required this.availability,
+  });
 
   @override
   _DateTimeSelectionScreenState createState() => _DateTimeSelectionScreenState();
@@ -53,7 +70,22 @@ class _DateTimeSelectionScreenState extends State<DateTimeSelectionScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Date and time saved successfully')),
       );
-      Navigator.pushReplacementNamed(context, '/ReviewSummaryScreen');
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ReviewSummaryScreen(
+            name: widget.name,
+            jobTitle: widget.jobTitle,
+            rate: widget.rate,
+            imageUrl: widget.imageUrl,
+            address: widget.address,
+            date: _selectedDate!.toIso8601String(),
+            time: _selectedTime!,
+            price: widget.price,
+            availability: widget.availability,
+          ),
+        ),
+      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Please select a date and time')),

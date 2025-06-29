@@ -11,6 +11,8 @@ import 'package:fix_it/core/di/di.dart';
 import 'package:fix_it/core/networking/api_result.dart';
 import 'package:fix_it/core/repos/signup_repo.dart';
 import 'package:fix_it/core/models/auth/signup_request_body.dart';
+import 'package:fix_it/core/helpers/shared_pref_helper.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RoleSelectionScreen extends StatelessWidget {
   final SignupResponse signupResponse;
@@ -23,7 +25,13 @@ class RoleSelectionScreen extends StatelessWidget {
     final customerRepo = getIt<CustomerRepo>();
 
     Future<void> handleNext(ServiceType type) async {
+      // Save the selected role in SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      
       if (type == ServiceType.provider) {
+        // Save role as worker
+        await prefs.setString('user_role', 'worker');
+        
         final req = WorkerDataRequest(
           workerId: signupResponse.id.toString(),
           email: signupResponse.email,
@@ -38,7 +46,14 @@ class RoleSelectionScreen extends StatelessWidget {
           skills: '',
         );
         await workerRepo.updateWorkerData(req);
+        
+        // Continue to phone verification for worker
+        Navigator.pushNamed(context, '/PhoneVerificationScreen');
+        
       } else if (type == ServiceType.seeker) {
+        // Save role as customer
+        await prefs.setString('user_role', 'customer');
+        
         final req = CustomerDataRequest(
           userId: signupResponse.id.toString(),
           name: signupResponse.name,
@@ -46,8 +61,10 @@ class RoleSelectionScreen extends StatelessWidget {
           age: '',
         );
         await customerRepo.updateCustomerData(req);
+        
+        // For customer, go directly to phone verification and stop there
+        Navigator.pushNamed(context, '/PhoneVerificationScreen');
       }
-      Navigator.pushNamed(context, '/PhoneVerificationScreen');
     }
 
     return Scaffold(

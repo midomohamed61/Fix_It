@@ -24,11 +24,17 @@ import 'package:fix_it/featuers/order/order_screen.dart';
 import 'package:fix_it/featuers/payment/payment_method_screen.dart';
 import 'package:fix_it/featuers/profile/notification_screen.dart';
 import 'package:fix_it/featuers/profile/help_support_screen.dart';
+import 'package:fix_it/featuers/splash/splash_screen.dart';
+import 'package:fix_it/featuers/onboarding/onboarding_screen.dart';
 
 
 class AppRouter {
   Route? generateRoute(RouteSettings setting) {
     switch (setting.name) {
+      case Routes.SplashScreen:
+        return MaterialPageRoute(
+          builder: (_) => const SplashScreen(),
+        );
       case Routes.SigninScreen:
         return MaterialPageRoute(
           builder: (context) => BlocProvider(
@@ -73,22 +79,6 @@ class AppRouter {
         return MaterialPageRoute(
           builder: (_) => const ProviderProfileScreen(),
         );
-      case Routes.LocationPermissionScreen:
-        return MaterialPageRoute(
-          builder: (_) =>  LocationPermissionScreen(),
-        );
-      case Routes.LocationAddressScreen:
-        return MaterialPageRoute(
-          builder: (_) =>  LocationAddressScreen(),
-        );
-      case Routes.DateTimeSelectionScreen:
-        return MaterialPageRoute(
-          builder: (_) =>  DateTimeSelectionScreen(),
-        );
-      case Routes.ReviewSummaryScreen:
-        return MaterialPageRoute(
-          builder: (_) =>  ReviewSummaryScreen(),
-        );
       case Routes.GalleryScreen:
         return MaterialPageRoute(
           builder: (_) =>  GalleryScreen(),
@@ -120,6 +110,10 @@ class AppRouter {
       case Routes.HelpSupportScreen:
         return MaterialPageRoute(
           builder: (_) => const HelpSupportScreen(),
+        );
+      case Routes.OnboardingScreen:
+        return MaterialPageRoute(
+          builder: (_) => const OnboardingScreen(),
         );
       default:
         return MaterialPageRoute(
