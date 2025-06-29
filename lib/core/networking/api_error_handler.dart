@@ -1,11 +1,9 @@
-import 'package:dio/dio.dart';
 import 'package:fix_it/core/networking/api_constant.dart';
 
 import 'api_error_model.dart';
 
 
 
-// TODO: wallahy I will refactor this .. Omar Ahmed
 enum DataSource {
   NO_CONTENT,
   BAD_REQUEST,
@@ -15,7 +13,7 @@ enum DataSource {
   INTERNAL_SERVER_ERROR,
   CONNECT_TIMEOUT,
   CANCEL,
-  RECIEVE_TIMEOUT,
+  RECIEIVE_TIMEOUT,
   SEND_TIMEOUT,
   CACHE_ERROR,
   NO_INTERNET_CONNECTION,
@@ -36,7 +34,7 @@ class ResponseCode {
   // local status code
   static const int CONNECT_TIMEOUT = -1;
   static const int CANCEL = -2;
-  static const int RECIEVE_TIMEOUT = -3;
+  static const int RECIEIVE_TIMEOUT = -3;
   static const int SEND_TIMEOUT = -4;
   static const int CACHE_ERROR = -5;
   static const int NO_INTERNET_CONNECTION = -6;
@@ -60,7 +58,7 @@ class ResponseMessage {
   // local status code
   static String CONNECT_TIMEOUT = ApiErrors.timeoutError;
   static String CANCEL = ApiErrors.defaultError;
-  static String RECIEVE_TIMEOUT = ApiErrors.timeoutError;
+  static String RECIEIVE_TIMEOUT = ApiErrors.timeoutError;
   static String SEND_TIMEOUT = ApiErrors.timeoutError;
   static String CACHE_ERROR = ApiErrors.cacheError;
   static String NO_INTERNET_CONNECTION = ApiErrors.noInternetError;
@@ -98,10 +96,10 @@ extension DataSourceExtension on DataSource {
       case DataSource.CANCEL:
         return ApiErrorModel(
             code: ResponseCode.CANCEL, message: ResponseMessage.CANCEL);
-      case DataSource.RECIEVE_TIMEOUT:
+      case DataSource.RECIEIVE_TIMEOUT:
         return ApiErrorModel(
-            code: ResponseCode.RECIEVE_TIMEOUT,
-            message: ResponseMessage.RECIEVE_TIMEOUT);
+            code: ResponseCode.RECIEIVE_TIMEOUT,
+            message: ResponseMessage.RECIEIVE_TIMEOUT);
       case DataSource.SEND_TIMEOUT:
         return ApiErrorModel(
             code: ResponseCode.SEND_TIMEOUT,
@@ -121,52 +119,18 @@ extension DataSourceExtension on DataSource {
   }
 }
 
-class ErrorHandler implements Exception {
-  late ApiErrorModel apiErrorModel;
+class ErrorHandler {
+  final String message;
+  final int? code;
 
-  ErrorHandler.handle(dynamic error) {
-    if (error is DioException) {
-      // dio error so its an error from response of the API or from dio itself
-      apiErrorModel = _handleError(error);
-    } else {
-      // default error
-      apiErrorModel = DataSource.DEFAULT.getFailure();
+  ErrorHandler({required this.message, this.code});
+
+  static ErrorHandler handle(dynamic error) {
+    // يمكنك تخصيص التعامل مع الأخطاء هنا (DioError, SocketException, ...)
+    if (error is Exception) {
+      return ErrorHandler(message: error.toString());
     }
-  }
-}
-
-ApiErrorModel _handleError(DioException error) {
-  switch (error.type) {
-    case DioExceptionType.connectionTimeout:
-      return DataSource.CONNECT_TIMEOUT.getFailure();
-    case DioExceptionType.sendTimeout:
-      return DataSource.SEND_TIMEOUT.getFailure();
-    case DioExceptionType.receiveTimeout:
-      return DataSource.RECIEVE_TIMEOUT.getFailure();
-    case DioExceptionType.badResponse:
-      if (error.response != null &&
-          error.response?.statusCode != null &&
-          error.response?.statusMessage != null) {
-        return ApiErrorModel.fromJson(error.response!.data);
-      } else {
-        return DataSource.DEFAULT.getFailure();
-      }
-    case DioExceptionType.unknown:
-      if (error.response != null &&
-          error.response?.statusCode != null &&
-          error.response?.statusMessage != null) {
-        return ApiErrorModel.fromJson(error.response!.data);
-      } else {
-        return DataSource.DEFAULT.getFailure();
-      }
-    case DioExceptionType.cancel:
-      return DataSource.CANCEL.getFailure();
-    case DioExceptionType.connectionError:
-      return DataSource.DEFAULT.getFailure();
-    case DioExceptionType.badCertificate:
-      return DataSource.DEFAULT.getFailure();
-    case DioExceptionType.badResponse:
-      return DataSource.DEFAULT.getFailure();
+    return ErrorHandler(message: "Unexpected error");
   }
 }
 

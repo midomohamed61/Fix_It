@@ -1,279 +1,191 @@
+import 'package:fix_it/core/themes/app_colors.dart';
+import 'package:fix_it/featuers/auth/signup/cubit/cubit/signup_cubit.dart';
+import 'package:fix_it/featuers/auth/signup/cubit/cubit/signup_state.dart';
+import 'package:fix_it/featuers/auth/signin/widget/auth_custom_app_bar.dart';
+import 'package:fix_it/featuers/auth/signin/widget/custom_password_field.dart';
+import 'package:fix_it/featuers/auth/signin/widget/custom_text_field.dart';
+import 'package:fix_it/featuers/auth/signin/widget/social_button.dart';
+import 'package:fix_it/core/helpers/app_regex.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:fix_it/featuers/auth/account/role_selection _screen.dart' as role;
+import 'package:fix_it/featuers/auth/account/phone_verification_screen.dart';
+import 'package:fix_it/featuers/auth/account/cubit/service_type_cubit.dart';
+import 'package:fix_it/core/di/di.dart';
 
-import '../../../core/routing/routes.dart';
-
-class SignupScreen extends StatefulWidget {
-  const SignupScreen({super.key});
-
-  @override
-  State<SignupScreen> createState() => _SignupScreenState();
-}
-
-class _SignupScreenState extends State<SignupScreen> {
-  @override
-   final _formKey = GlobalKey<FormState>(); // Form key for validation
-  bool _isPasswordVisible = false;
-  bool _isChecked = false;
-
-  final TextEditingController _fullNameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+class SignUpScreen extends StatelessWidget {
+  const SignUpScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final cubit = context.read<SignupCubit>();
+
     return Scaffold(
+      appBar: AuthCustomAppBar(),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
-        child: Center(
+        child: Form(
+          key: cubit.formKey,
           child: SingleChildScrollView(
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Image(
-                    image: AssetImage("assets/images/Frame.png"),
-                    height: 50.h,
-                    width: 48.75.w,
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    "Enter your email and password to login",
-                    style: GoogleFonts.poppins(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 20),
+                const Text("Create your account",
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                const SizedBox(height: 20),
 
-                  // Full Name Field
-                  TextFormField(
-                    controller: _fullNameController,
-                    decoration: InputDecoration(
-                      prefixIcon: Icon(Icons.person_outline),
-                      hintText: "Full name",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Full name is required";
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 15),
+                CustomTextField(
+                  hintText: "Name",
+                  icon: Icons.person_outline,
+                  controller: cubit.nameController,
+                  validator: (value) =>
+                      value!.isEmpty ? "Name is required" : null,
+                ),
+                const SizedBox(height: 16),
 
-                  // Email Field
-                  TextFormField(
-                    controller: _emailController,
-                    decoration: InputDecoration(
-                      prefixIcon: Icon(Icons.email_outlined),
-                      hintText: "Enter your email",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Email is required";
-                      } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                        return "Enter a valid email";
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 15),
+                CustomTextField(
+                  hintText: "Email",
+                  icon: Icons.email_outlined,
+                  controller: cubit.emailController,
+                  validator: (value) => AppRegex.isEmailValid(value!)
+                      ? null
+                      : "Invalid email format",
+                ),
+                const SizedBox(height: 16),
 
-                  // Password Field with Visibility Toggle
-                  TextFormField(
-                    controller: _passwordController,
-                    obscureText: !_isPasswordVisible,
-                    decoration: InputDecoration(
-                      prefixIcon: Icon(Icons.lock_outline),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _isPasswordVisible = !_isPasswordVisible;
-                          });
-                        },
-                      ),
-                      hintText: "Enter password",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Password is required";
-                      } else if (value.length < 6) {
-                        return "Password must be at least 6 characters";
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 10),
+                CustomTextField(
+                  hintText: "Phone",
+                  icon: Icons.phone_outlined,
+                  controller: cubit.phoneController,
+                  validator: (value) =>
+                      value!.isEmpty ? "Phone is required" : null,
+                ),
+                const SizedBox(height: 16),
 
-                  // Terms & Conditions Checkbox
-                  Row(
-                    children: [
-                      Checkbox(
-                        value: _isChecked,
-                        onChanged: (bool? value) {
-                          setState(() {
-                            _isChecked = value!;
-                          });
-                        },
-                      ),
-                      Expanded(
-                        child: Text.rich(
-                          TextSpan(
-                            text: "I Agree With FixIt’s ",
-                            style: GoogleFonts.poppins(fontSize: 14),
-                            children: [
-                              TextSpan(
-                                text: "Term & Conditions",
-                                style: GoogleFonts.poppins(
-                                  fontSize: 14,
-                                  color: Colors.blue,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                CustomPasswordField(
+                  controller: cubit.passwordController,
+                  validator: (value) =>
+                      value!.isEmpty ? "Password is required" : null,
+                ),
+                const SizedBox(height: 16),
+
+                CustomPasswordField(
+                  controller: cubit.passwordConfirmationController,
+                  validator: (value) => value != cubit.passwordController.text
+                      ? "Passwords do not match"
+                      : null,
+                ),
+                const SizedBox(height: 16),
+
+                BlocConsumer<SignupCubit, SignupState>(
+                  listener: (context, state) {
+                    if (state is SignupSuccess) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Signup Successful!')),
+                      );
+                      Future.delayed(Duration.zero, () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => BlocProvider(
+                              create: (context) => getIt<ServiceTypeCubit>(),
+                              child: role.RoleSelectionScreen(
+                                signupResponse: state.data,
                               ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-
-                  // Sign Up Button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      onPressed: () {
-                        if (_formKey.currentState!.validate() && _isChecked) {
-                          // Form is valid, proceed with sign up
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text("Signup Successful")),
-                          );
-                        }
-                      },
-                      child: Text(
-                        "Sign Up",
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Already have an account? Sign in now
-                  Center(
-                    child: Text.rich(
-                      TextSpan(
-                        text: "Already have an account? ",
-                        style: GoogleFonts.poppins(fontSize: 14),
-                        children: [
-                          TextSpan(
-                            text: "Sign in now",
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () {
-                              Navigator.of(context).pushNamed(Routes.SigninScreen);
-                            },
-                            style: GoogleFonts.poppins(
-                              fontSize: 14,
-                              color: Colors.blue,
-                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                        ],
+                        );
+                      });
+                    } else if (state is SignupError) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(state.error)),
+                      );
+                    }
+                  },
+                  builder: (context, state) {
+                    final isLoading = state is SignupLoading;
+                    return SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: isLoading
+                            ? null
+                            : () => cubit.emitSignupStates(),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: isLoading
+                            ? const CircularProgressIndicator(
+                                color: AppColors.backgroundColor,
+                              )
+                            : const Text("Sign Up",
+                                style: TextStyle(color: AppColors.backgroundColor)),
                       ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 20),
+
+                Center(
+                  child: Text.rich(
+                    TextSpan(
+                      text: "Already have an account? ",
+                      style: const TextStyle(fontSize: 14, color: AppColors.textColor),
+                      children: [
+                        TextSpan(
+                          text: "Sign in",
+                          style: const TextStyle(
+                              color: AppColors.primaryColor, fontWeight: FontWeight.bold),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () {
+                              Navigator.pushNamed(context, '/SigninScreen');
+                            },
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 20),
+                ),
+                const SizedBox(height: 20),
 
-                  // Divider
-                  Row(
-                    children: [
-                      Expanded(child: Divider(thickness: 1)),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Text("Or", style: GoogleFonts.poppins()),
-                      ),
-                      Expanded(child: Divider(thickness: 1)),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
+                Row(
+                  children: const [
+                    Expanded(child: Divider(thickness: 1)),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text("Or"),
+                    ),
+                    Expanded(child: Divider(thickness: 1)),
+                  ],
+                ),
+                const SizedBox(height: 20),
 
-                  // Social Login Buttons
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _socialButton(
-                        icon: FontAwesomeIcons.google,
-                        text: "Google",
-                        color: Colors.white,
-                        textColor: Colors.black,
-                      ),
-                      _socialButton(
-                        icon: FontAwesomeIcons.facebook,
-                        text: "Facebook",
-                        color: Colors.white,
-                        textColor: Colors.black,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                const Center(child: Text("Sign up with")),
+                const SizedBox(height: 16),
+
+                SocialButton(
+                  icon: FontAwesomeIcons.google,
+                  text: 'Google',
+                  onPressed: () {},
+                ),
+                const SizedBox(height: 10),
+                SocialButton(
+                  icon: FontAwesomeIcons.facebook,
+                  text: 'Facebook',
+                  onPressed: () {},
+                ),
+                const SizedBox(height: 30),
+              ],
             ),
           ),
         ),
       ),
     );
   }
-
-  Widget _socialButton({required IconData icon, required String text, required Color color, required Color textColor}) {
-    return ElevatedButton.icon(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        elevation: 2,
-      ),
-      onPressed: () {},
-      icon: Icon(icon, color: textColor),
-      label: Text(
-        text,
-        style: GoogleFonts.poppins(fontSize: 14, color: textColor),
-      ),
-    );
-  }
 }
-
-
-
-
-
-
-
-
-
-

@@ -1,94 +1,132 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SharedPrefHelper {
-  // private constructor as I don't want to allow creating an instance of this class itself.
-  SharedPrefHelper._();
+  static const _secureStorage = FlutterSecureStorage();
+  static SharedPreferences? _prefs;
 
-  /// Removes a value from SharedPreferences with given [key].
-  static removeData(String key) async {
-    debugPrint('SharedPrefHelper : data with key : $key has been removed');
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    await sharedPreferences.remove(key);
+  static Future<void> _init() async {
+    _prefs ??= await SharedPreferences.getInstance();
   }
 
-  /// Removes all keys and values in the SharedPreferences
-  static clearAllData() async {
-    debugPrint('SharedPrefHelper : all data has been cleared');
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    await sharedPreferences.clear();
-  }
-
-  /// Saves a [value] with a [key] in the SharedPreferences.
-  static setData(String key, value) async {
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    debugPrint("SharedPrefHelper : setData with key : $key and value : $value");
-    switch (value.runtimeType) {
-      case String:
-        await sharedPreferences.setString(key, value);
-        break;
-      case int:
-        await sharedPreferences.setInt(key, value);
-        break;
-      case bool:
-        await sharedPreferences.setBool(key, value);
-        break;
-      case double:
-        await sharedPreferences.setDouble(key, value);
-        break;
-      default:
-        return null;
+  static Future<void> removeData(String key) async {
+    try {
+      if (kIsWeb) {
+        await _init();
+        await _prefs?.remove(key);
+      } else {
+        await _secureStorage.delete(key: key);
+      }
+    } catch (e) {
+      debugPrint('Error removing $key: $e');
     }
   }
 
-  /// Gets a bool value from SharedPreferences with given [key].
-  static getBool(String key) async {
-    debugPrint('SharedPrefHelper : getBool with key : $key');
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    return sharedPreferences.getBool(key) ?? false;
+  static Future<void> setData<T>(String key, T value) async {
+    try {
+      if (kIsWeb) {
+        await _init();
+        switch (T) {
+          case String:
+            await _prefs?.setString(key, value as String);
+            break;
+          case int:
+            await _prefs?.setInt(key, value as int);
+            break;
+          case bool:
+            await _prefs?.setBool(key, value as bool);
+            break;
+          case double:
+            await _prefs?.setDouble(key, value as double);
+            break;
+          default:
+            throw Exception('Unsupported type $T');
+        }
+      } else {
+        await _secureStorage.write(
+          key: key,
+          value: value.toString(),
+        );
+      }
+    } catch (e) {
+      debugPrint('Error saving $key: $e');
+    }
   }
 
-  /// Gets a double value from SharedPreferences with given [key].
-  static getDouble(String key) async {
-    debugPrint('SharedPrefHelper : getDouble with key : $key');
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    return sharedPreferences.getDouble(key) ?? 0.0;
+  static Future<String> getString(String key) async {
+    try {
+      if (kIsWeb) {
+        await _init();
+        return _prefs?.getString(key) ?? '';
+      }
+      return await _secureStorage.read(key: key) ?? '';
+    } catch (e) {
+      debugPrint('Error reading $key: $e');
+      return '';
+    }
   }
 
-  /// Gets an int value from SharedPreferences with given [key].
-  static getInt(String key) async {
-    debugPrint('SharedPrefHelper : getInt with key : $key');
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    return sharedPreferences.getInt(key) ?? 0;
+  static Future<int> getInt(String key) async {
+    try {
+      if (kIsWeb) {
+        await _init();
+        return _prefs?.getInt(key) ?? 0;
+      }
+      final value = await _secureStorage.read(key: key);
+      return int.tryParse(value ?? '') ?? 0;
+    } catch (e) {
+      debugPrint('Error reading $key: $e');
+      return 0;
+    }
   }
 
-  /// Gets an String value from SharedPreferences with given [key].
-  static getString(String key) async {
-    debugPrint('SharedPrefHelper : getString with key : $key');
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    return sharedPreferences.getString(key) ?? '';
+  static Future<bool> getBool(String key) async {
+    try {
+      if (kIsWeb) {
+        await _init();
+        return _prefs?.getBool(key) ?? false;
+      }
+      final value = await _secureStorage.read(key: key);
+      return value?.toLowerCase() == 'true';
+    } catch (e) {
+      debugPrint('Error reading $key: $e');
+      return false;
+    }
   }
 
-  /// Saves a [value] with a [key] in the FlutterSecureStorage.
-  static setSecuredString(String key, String value) async {
-    const flutterSecureStorage = FlutterSecureStorage();
-    debugPrint(
-        "FlutterSecureStorage : setSecuredString with key : $key and value : $value");
-    await flutterSecureStorage.write(key: key, value: value);
+  static Future<double> getDouble(String key) async {
+    try {
+      if (kIsWeb) {
+        await _init();
+        return _prefs?.getDouble(key) ?? 0.0;
+      }
+      final value = await _secureStorage.read(key: key);
+      return double.tryParse(value ?? '') ?? 0.0;
+    } catch (e) {
+      debugPrint('Error reading $key: $e');
+      return 0.0;
+    }
   }
 
-  /// Gets an String value from FlutterSecureStorage with given [key].
-  static getSecuredString(String key) async {
-    const flutterSecureStorage = FlutterSecureStorage();
-    debugPrint('FlutterSecureStorage : getSecuredString with key :');
-    return await flutterSecureStorage.read(key: key) ?? '';
+  static Future<void> setStringList(String key, List<String> value) async {
+  try {
+    final joined = value.join(',');
+    await setData<String>(key, joined);
+  } catch (e) {
+    debugPrint('Error saving list for $key: $e');
   }
+}
 
-  /// Removes all keys and values in the FlutterSecureStorage
-  static clearAllSecuredData() async {
-    debugPrint('FlutterSecureStorage : all data has been cleared');
-    const flutterSecureStorage = FlutterSecureStorage();
-    await flutterSecureStorage.deleteAll();
+static Future<List<String>> getStringList(String key) async {
+  try {
+    final data = await getString(key);
+    if (data.isEmpty) return [];
+    return data.split(',').map((e) => e.trim()).toList();
+  } catch (e) {
+    debugPrint('Error reading list for $key: $e');
+    return [];
   }
+}
+
 }

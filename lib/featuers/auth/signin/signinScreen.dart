@@ -1,288 +1,152 @@
-import 'package:fix_it/core/routing/routes.dart';
+import 'package:fix_it/core/themes/app_colors.dart';
+import 'package:fix_it/featuers/auth/signin/cubit/cubit/signin_cubit.dart';
+import 'package:fix_it/featuers/auth/signin/cubit/cubit/signin_state.dart';
+import 'package:fix_it/featuers/auth/signin/widget/auth_custom_app_bar.dart';
+import 'package:fix_it/featuers/auth/signin/widget/custom_password_field.dart';
+import 'package:fix_it/featuers/auth/signin/widget/custom_text_field.dart';
+import 'package:fix_it/featuers/auth/signin/widget/social_button.dart';
+import 'package:fix_it/core/helpers/app_regex.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:fix_it/featuers/BottomNavBar.dart';
 
-class SigninScreen extends StatefulWidget {
-  const SigninScreen({super.key});
-
-  @override
-  State<SigninScreen> createState() => _SigninScreenState();
-}
-
-class _SigninScreenState extends State<SigninScreen> {
-  final _formKey = GlobalKey<FormState>(); // Form key for validation
-  bool _isPasswordVisible = false;
-  bool _isChecked = false;
-
-  final TextEditingController _fullNameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+class SignInScreen extends StatelessWidget {
+  const SignInScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final cubit = context.read<SigninCubit>();
+
     return Scaffold(
+      appBar: AuthCustomAppBar(),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
-        child: Center(
+        child: Form(
+          key: cubit.formKey,
           child: SingleChildScrollView(
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Image(
-                    image: AssetImage("assets/images/Frame.png"),
-                    height: 50.h,
-                    width: 48.75.w,
-                  ),
-                  const SizedBox(height: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 20),
+                const Text("Sign in to your account",
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                const SizedBox(height: 20),
 
-                  Text(
-                    "Enter your email and password to login",
-                    style: GoogleFonts.poppins(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
+                CustomTextField(
+                  hintText: "Email",
+                  icon: Icons.email_outlined,
+                  controller: cubit.emailController,
+                  validator: (value) => AppRegex.isEmailValid(value!)
+                      ? null
+                      : "Invalid email format",
+                ),
+                const SizedBox(height: 16),
 
-                  // Full Name Field
-                  TextFormField(
-                    controller: _fullNameController,
-                    decoration: InputDecoration(
-                      prefixIcon: Icon(Icons.person_outline),
-                      hintText: "Full name",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Full name is required";
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 15),
+                CustomPasswordField(
+                  controller: cubit.passwordController,
+                  validator: (value) =>
+                      value!.isEmpty ? "Password is required" : null,
+                ),
+                const SizedBox(height: 16),
 
-                  // Email Field
-                  TextFormField(
-                    controller: _emailController,
-                    decoration: InputDecoration(
-                      prefixIcon: Icon(Icons.email_outlined),
-                      hintText: "Enter your email",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Email is required";
-                      } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                        return "Enter a valid email";
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 15),
-
-                  // Password Field with Visibility Toggle
-                  TextFormField(
-                    controller: _passwordController,
-                    obscureText: !_isPasswordVisible,
-                    decoration: InputDecoration(
-                      prefixIcon: Icon(Icons.lock_outline),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _isPasswordVisible = !_isPasswordVisible;
-                          });
-                        },
-                      ),
-                      hintText: "Enter your password",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Password is required";
-                      } else if (value.length < 6) {
-                        return "Password must be at least 6 characters";
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 10),
-
-                  // Terms & Conditions Checkbox
-                  Row(
-                    children: [
-                      Checkbox(
-                        value: _isChecked,
-                        onChanged: (bool? value) {
-                          setState(() {
-                            _isChecked = value!;
-                          });
-                        },
-                      ),
-                      Expanded(
-                        child: Text.rich(
-                          TextSpan(
-                            text: "I Agree With FixIt’s ",
-                            style: GoogleFonts.poppins(fontSize: 14),
-                            children: [
-                              TextSpan(
-                                text: "Term & Conditions",
-                                style: GoogleFonts.poppins(
-                                  fontSize: 14,
-                                  color: Colors.blue,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
+                BlocConsumer<SigninCubit, SigninState>(
+                  listener: (context, state) {
+                    if (state is Success) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Login Successful!')),
+                      );
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (_) => BottomNavBar()),
+                      );
+                    } else if (state is Error) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(state.error)),
+                      );
+                    }
+                  },
+                  builder: (context, state) {
+                    final isLoading = state is Loading;
+                    return SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: isLoading
+                            ? null
+                            : () => cubit.emitSigninStates(),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
                           ),
                         ),
+                        child: isLoading
+                            ? const CircularProgressIndicator(
+                                color: AppColors.backgroundColor,
+                              )
+                            : const Text("Sign In",
+                                style: TextStyle(color: AppColors.backgroundColor)),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
+                    );
+                  },
+                ),
+                const SizedBox(height: 20),
 
-                  // Forgot Password
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () {},
-                      child: Text(
-                        "Forgot Password?",
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          color: Colors.blue,
+                Center(
+                  child: Text.rich(
+                    TextSpan(
+                      text: "Don't have an account? ",
+                      style: const TextStyle(fontSize: 14, color: Colors.black),
+                      children: [
+                        TextSpan(
+                          text: "Sign up now",
+                          style: const TextStyle(
+                              color: AppColors.primaryColor, fontWeight: FontWeight.bold),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () {
+                              Navigator.pushNamed(context, '/SignupScreen');
+                            },
                         ),
-                      ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 10),
+                ),
+                const SizedBox(height: 20),
 
-                  // Sign In Button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      onPressed: () {
-                        if (_formKey.currentState!.validate() && _isChecked) {
-                          // Form is valid, proceed with sign-in
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text("Sign-in Successful")),
-                          );
-                        }
-                      },
-                      child: Text(
-                        "Sign In",
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
+                Row(
+                  children: const [
+                    Expanded(child: Divider(thickness: 1)),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text("Or"),
                     ),
-                  ),
-                  const SizedBox(height: 20),
+                    Expanded(child: Divider(thickness: 1)),
+                  ],
+                ),
+                const SizedBox(height: 20),
 
-                  // Sign Up Prompt
-                  Center(
-                    child: Text.rich(
-                      TextSpan(
-                        text: "New to fixIt? ",
-                        style: GoogleFonts.poppins(fontSize: 14),
-                        children: [
-                          TextSpan(
-                            text: "Sign up now",
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () {
-                                Navigator.of(context)
-                                    .pushNamed(Routes.SignupScreen);
-                              },
-                            style: GoogleFonts.poppins(
-                              fontSize: 14,
-                              color: Colors.blue,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
+                const Center(child: Text("Sign in with")),
+                const SizedBox(height: 16),
 
-                  // Divider
-                  Row(
-                    children: [
-                      Expanded(child: Divider(thickness: 1)),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Text("Or", style: GoogleFonts.poppins()),
-                      ),
-                      Expanded(child: Divider(thickness: 1)),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Social Login Buttons
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _socialButton(
-                        icon: FontAwesomeIcons.google,
-                        text: "Google",
-                        color: Colors.white,
-                        textColor: Colors.black,
-                      ),
-                      _socialButton(
-                        icon: FontAwesomeIcons.facebook,
-                        text: "Facebook",
-                        color: Colors.white,
-                        textColor: Colors.black,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                SocialButton(
+                  icon: FontAwesomeIcons.google,
+                  text: 'Google',
+                  onPressed: () {},
+                ),
+                const SizedBox(height: 10),
+                SocialButton(
+                  icon: FontAwesomeIcons.facebook,
+                  text: 'Facebook',
+                  onPressed: () {},
+                ),
+                const SizedBox(height: 30),
+              ],
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _socialButton(
-      {required IconData icon,
-      required String text,
-      required Color color,
-      required Color textColor}) {
-    return ElevatedButton.icon(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        elevation: 2,
-      ),
-      onPressed: () {},
-      icon: Icon(icon, color: textColor),
-      label: Text(
-        text,
-        style: GoogleFonts.poppins(fontSize: 14, color: textColor),
       ),
     );
   }

@@ -1,10 +1,10 @@
-class ApiConstants {
-  static const String apiBaseUrl = "https://vcare.integration25.com/api/";
+// class ApiConstants {
+//   static const String apiBaseUrl = "https://vcare.integration25.com/api/";
 
-  static const String login = "auth/login";
-  static const String signup = "auth/register";
+//   static const String login = "auth/login";
+//   static const String signup = "auth/register";
   
-}
+// }
 
 class ApiErrors {
   static const String badRequestError = "badRequestError";
@@ -22,4 +22,8 @@ class ApiErrors {
   static const String loadingMessage = "loading_message";
   static const String retryAgainMessage = "retry_again_message";
   static const String ok = "Ok";
+}
+
+class ApiConstant {
+  static const String baseUrl = "https://homeservices.fly.dev";
 }
